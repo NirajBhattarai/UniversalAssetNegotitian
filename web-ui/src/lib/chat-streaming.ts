@@ -44,20 +44,55 @@ export async function processStreamChunks(
 ): Promise<string> {
   let fullOutput = '';
   let hasContent = false;
+  let chunkCount = 0;
+  const maxChunks = 1000; // Prevent infinite loops
 
-  for await (const chunk of stream) {
-    if (onChunk) {
-      onChunk(chunk);
-    }
-    
-    if (chunk.output) {
-      const content = chunk.output;
-      fullOutput += content;
-      hasContent = true;
+  try {
+    for await (const chunk of stream) {
+      chunkCount++;
       
-      await streamChunk(res, content);
+      if (chunkCount > maxChunks) {
+        console.warn('Max chunks reached, breaking stream');
+        break;
+      }
+
+      if (onChunk) {
+        onChunk(chunk);
+      }
+      
+      // Handle different chunk types
+      if (chunk.output) {
+        const content = chunk.output;
+        fullOutput += content;
+        hasContent = true;
+        
+        await streamChunk(res, content);
+      } else if (chunk.content) {
+        // Handle direct content chunks
+        const content = chunk.content;
+        fullOutput += content;
+        hasContent = true;
+        
+        await streamChunk(res, content);
+      } else if (chunk.text) {
+        // Handle text chunks
+        const content = chunk.text;
+        fullOutput += content;
+        hasContent = true;
+        
+        await streamChunk(res, content);
+      }
+
+      // Log chunk details for debugging
+      if (chunkCount % 10 === 0) {
+        console.log(`Processed ${chunkCount} chunks, output length: ${fullOutput.length}`);
+      }
     }
+  } catch (error) {
+    console.error('Error processing stream chunks:', error);
+    throw error;
   }
 
+  console.log(`Stream processing complete. Total chunks: ${chunkCount}, Output length: ${fullOutput.length}`);
   return fullOutput;
 }

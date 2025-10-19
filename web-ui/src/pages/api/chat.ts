@@ -61,17 +61,64 @@ export default async function handler(
 
     console.log('Starting chat stream for prompt:', inputPrompt);
 
-    try {
-      // Stream from agent executor
-      const stream = await agentExecutor.stream({ input: inputPrompt });
+    // Check if this is a wallet balance request and handle it directly
+    const lowerPrompt = inputPrompt.toLowerCase();
+    const walletAddressMatch = inputPrompt.match(/(0x[a-fA-F0-9]{40}|0\.0\.\d+)/);
+    
+    if ((lowerPrompt.includes('balance') || lowerPrompt.includes('wallet')) && walletAddressMatch) {
+      console.log('Detected wallet balance request, handling directly');
       
-      console.log('Stream created:', stream);
+      try {
+        const { createWalletBalanceTool } = await import('../../lib/wallet-balance-tool');
+        const walletTool = createWalletBalanceTool();
+        
+        // Extract network if specified
+        let network = 'all';
+        if (lowerPrompt.includes('ethereum')) network = 'ethereum';
+        else if (lowerPrompt.includes('polygon')) network = 'polygon';
+        else if (lowerPrompt.includes('bsc')) network = 'bsc';
+        else if (lowerPrompt.includes('arbitrum')) network = 'arbitrum';
+        else if (lowerPrompt.includes('optimism')) network = 'optimism';
+        else if (lowerPrompt.includes('avalanche')) network = 'avalanche';
+        else if (lowerPrompt.includes('hedera')) network = 'hedera';
+        
+        const result = await walletTool.invoke({
+          walletAddress: walletAddressMatch[0],
+          network: network
+        });
+        
+        // Stream the result
+        await streamChunk(res, result, 0);
+        streamEnd(res, result);
+        return;
+      } catch (error) {
+        console.error('Direct wallet balance handling failed:', error);
+        // Fall through to agent executor
+      }
+    }
+
+    try {
+      // Stream from agent executor with timeout
+      const streamPromise = agentExecutor.stream({ input: inputPrompt });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Agent executor timeout after 60 seconds')), 60000)
+      );
+      
+      const stream = await Promise.race([streamPromise, timeoutPromise]);
+      
+      console.log('Stream created successfully');
 
       // Process streaming chunks
       const fullOutput = await processStreamChunks(
         stream,
         res,
-        (chunk) => console.log('Token:--->', chunk)
+        (chunk) => {
+          console.log('Stream chunk received:', {
+            hasOutput: !!chunk.output,
+            outputLength: chunk.output?.length || 0,
+            chunkKeys: Object.keys(chunk)
+          });
+        }
       );
 
       // If no content was streamed, provide fallback

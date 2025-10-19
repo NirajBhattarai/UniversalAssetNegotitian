@@ -33,17 +33,33 @@ export const createWalletBalanceTool = () => {
 
         console.log(`Checking wallet balance for: ${walletAddress} on network: ${network}`);
 
-        // Call the wallet balance agent service
-        const response = await fetch('http://localhost:41252/api/balance', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            walletAddress: walletAddress,
-            network: network,
-          }),
-        });
+        // Prepare the request body with proper network handling
+        const requestBody: any = {
+          walletAddress: walletAddress,
+        };
+
+        // If network is specified and not 'all', pass it as specificNetworks array
+        if (network && network !== 'all') {
+          requestBody.specificNetworks = [network];
+        }
+
+        console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
+        // Call the wallet balance agent service with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+        try {
+          const response = await fetch('http://localhost:41252/api/balance', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal,
+          });
+
+          clearTimeout(timeoutId);
 
         const data = await response.json();
 
@@ -94,9 +110,19 @@ export const createWalletBalanceTool = () => {
         } else {
           return `⚠️ **Wallet Balance Service Error**\n\nFailed to retrieve balance information.\n\n**Error:** ${data.error || 'Unknown error'}\n\n**Troubleshooting:**\n- Ensure the wallet balance agent service is running on localhost:41252\n- Verify the wallet address format is correct\n- Check if the wallet has any activity on the requested networks`;
         }
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          
+          if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+            return `⏰ **Request Timeout**\n\nThe wallet balance request timed out after 30 seconds.\n\n**Possible causes:**\n- The wallet balance agent service is overloaded\n- Network connectivity issues\n- The wallet address has no activity on the requested networks\n\n**Troubleshooting:**\n- Try again with a specific network (e.g., "ethereum" instead of "all")\n- Ensure the wallet balance agent service is running properly\n- Check if the wallet address is valid and has activity`;
+          }
+          
+          console.error('Wallet balance tool error:', fetchError);
+          return `❌ **Connection Error**\n\nFailed to connect to the wallet balance agent service.\n\n**Error:** ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}\n\n**Troubleshooting:**\n- Ensure the wallet balance agent service is running on localhost:41252\n- Check your network connection\n- Verify the service endpoint is accessible`;
+        }
       } catch (error) {
         console.error('Wallet balance tool error:', error);
-        return `❌ **Connection Error**\n\nFailed to connect to the wallet balance agent service.\n\n**Error:** ${error instanceof Error ? error.message : 'Unknown error'}\n\n**Troubleshooting:**\n- Ensure the wallet balance agent service is running on localhost:41252\n- Check your network connection\n- Verify the service endpoint is accessible`;
+        return `❌ **Unexpected Error**\n\nAn unexpected error occurred while checking wallet balance.\n\n**Error:** ${error instanceof Error ? error.message : 'Unknown error'}\n\n**Troubleshooting:**\n- Ensure the wallet balance agent service is running on localhost:41252\n- Check your network connection\n- Verify the service endpoint is accessible`;
       }
     },
     {
@@ -128,7 +154,7 @@ Examples:
         network: z
           .string()
           .optional()
-          .describe('Specific network to check (default: "all" for all networks)')
+          .describe('Specific network to check. Use "all" for all networks, or specify: "ethereum", "polygon", "bsc", "arbitrum", "optimism", "avalanche", "hedera"')
           .default('all'),
       }),
     }

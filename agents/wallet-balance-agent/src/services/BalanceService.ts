@@ -75,14 +75,29 @@ export class MultiNetworkBalanceService {
 
     const networkPromises: Promise<NetworkBalanceResult | null>[] = [];
     
-    if (networksToCheck.includes('hedera')) {
-      networkPromises.push(this.getHederaBalance(walletAddress));
-    }
+    // Check each network and validate address format
+    // if (networksToCheck.includes('hedera')) {
+    //   if (this.isValidWalletAddress(walletAddress, 'hedera')) {
+    //     networkPromises.push(this.getHederaBalance(walletAddress));
+    //   } else {
+    //     console.log(`[Balance Service] Skipping Hedera check - invalid address format for: ${walletAddress}`);
+    //   }
+    // }
+    
     if (networksToCheck.includes('ethereum')) {
-      networkPromises.push(this.getEthereumBalance(walletAddress));
+      if (this.isValidWalletAddress(walletAddress, 'ethereum')) {
+        networkPromises.push(this.getEthereumBalance(walletAddress));
+      } else {
+        console.log(`[Balance Service] Skipping Ethereum check - invalid address format for: ${walletAddress}`);
+      }
     }
+    
     if (networksToCheck.includes('polygon')) {
-      networkPromises.push(this.getPolygonBalance(walletAddress));
+      if (this.isValidWalletAddress(walletAddress, 'polygon')) {
+        networkPromises.push(this.getPolygonBalance(walletAddress));
+      } else {
+        console.log(`[Balance Service] Skipping Polygon check - invalid address format for: ${walletAddress}`);
+      }
     }
 
     const networks = await Promise.all(networkPromises);
@@ -227,6 +242,11 @@ export class MultiNetworkBalanceService {
       // Get native ETH balance
       const ethBalance = await this.ethereumProvider.getBalance(normalizedAddress);
       const nativeToken = getNativeTokenByNetwork('ethereum')!;
+
+      console.log('Native token:', nativeToken);
+      console.log('Native balance:', ethBalance.toString());
+      console.log('Native balance formatted:', ethers.formatEther(ethBalance));
+      console.log('Native balance USD value:', this.convertEthToUsd(Number(ethers.formatEther(ethBalance))));
       
       const nativeBalance: BalanceResult = {
         token: nativeToken,
@@ -240,30 +260,30 @@ export class MultiNetworkBalanceService {
       const tokenBalances: BalanceResult[] = [];
       let totalUsdValue = nativeBalance.usdValue || 0;
 
-      // Get ERC20 token balances
-      const ethereumTokens = getTokensByNetwork('ethereum').filter(token => !token.isNative);
+      // // Get ERC20 token balances
+      // const ethereumTokens = getTokensByNetwork('ethereum').filter(token => !token.isNative);
       
-      for (const tokenConfig of ethereumTokens) {
-        try {
-          const contract = new ethers.Contract(tokenConfig.address, tokenConfig.abi!, this.ethereumProvider);
-          const balance = await contract.balanceOf(normalizedAddress);
+      // for (const tokenConfig of ethereumTokens) {
+      //   try {
+      //     const contract = new ethers.Contract(tokenConfig.address, tokenConfig.abi!, this.ethereumProvider);
+      //     const balance = await contract.balanceOf(normalizedAddress);
           
-          if (balance > 0) {
-            const balanceResult: BalanceResult = {
-              token: tokenConfig,
-              balance: balance.toString(),
-              balanceFormatted: this.formatTokenBalance(balance.toString(), tokenConfig.decimals),
-              usdValue: this.convertTokenToUsd(tokenConfig.symbol, balance.toString(), tokenConfig.decimals),
-              network: 'ethereum',
-              blockchain: 'Ethereum'
-            };
-            tokenBalances.push(balanceResult);
-            totalUsdValue += balanceResult.usdValue || 0;
-          }
-        } catch (error) {
-          console.warn(`[Balance Service] Error fetching ${tokenConfig.symbol} balance:`, error);
-        }
-      }
+      //     if (balance > 0) {
+      //       const balanceResult: BalanceResult = {
+      //         token: tokenConfig,
+      //         balance: balance.toString(),
+      //         balanceFormatted: this.formatTokenBalance(balance.toString(), tokenConfig.decimals),
+      //         usdValue: this.convertTokenToUsd(tokenConfig.symbol, balance.toString(), tokenConfig.decimals),
+      //         network: 'ethereum',
+      //         blockchain: 'Ethereum'
+      //       };
+      //       tokenBalances.push(balanceResult);
+      //       totalUsdValue += balanceResult.usdValue || 0;
+      //     }
+      //   } catch (error) {
+      //     console.warn(`[Balance Service] Error fetching ${tokenConfig.symbol} balance:`, error);
+      //   }
+      // }
 
       return {
         networkId: 'ethereum',

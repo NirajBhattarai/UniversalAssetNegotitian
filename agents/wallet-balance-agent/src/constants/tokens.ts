@@ -96,7 +96,7 @@ export const TOKEN_ADDRESSES = {
   },
   ETHEREUM: {
     ETH: 'ETH', // Native Ethereum token
-    USDC: '0xA0b86a33E6441b8c4C8C0d4B0c4B0c4B0c4B0c4B', // USDC on Ethereum
+    USDC: '0xA0b86a33E6441b8c4C8C0d4B0c4B0c4B0c4B0c4B', // USDC on Ethereum - INVALID ADDRESS
     USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT on Ethereum
     WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'  // Wrapped ETH
   },
