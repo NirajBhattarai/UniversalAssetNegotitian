@@ -26,10 +26,9 @@ class MockA2AClient {
     
     // Mock responses based on agent type
     const responses = {
-      'travel': '🌍 Travel Agent: I\'ll coordinate this request with other agents...',
-      'flight': '✈️ Flight Agent: Searching flight databases...',
-      'hotel': '🏨 Hotel Agent: Checking hotel availability...',
-      'payment': '💳 Payment Agent: Calculating costs and payment options...'
+      'carbon-credit-negotiation': '🌱 Carbon Credit Negotiation Agent: Analyzing marketplace offers and finding best deals...',
+      'carbon-credit-payment': '💳 Carbon Credit Payment Agent: Processing carbon credit payments with blockchain settlement...',
+      'asset-broker': '🤝 Asset Broker Agent: Coordinating carbon credit transactions...'
     };
     
     return responses[targetAgent as keyof typeof responses] || '🤖 Agent: Message received and processed.';
@@ -56,10 +55,9 @@ class MultiAgentOrchestrator {
   }
 
   private initializeAgents(): void {
-    this.agents.set('travel', new MockA2AClient('travel', 'Travel Agent', 41243));
-    this.agents.set('flight', new MockA2AClient('flight', 'Flight Agent', 41244));
-    this.agents.set('hotel', new MockA2AClient('hotel', 'Hotel Agent', 41245));
-    this.agents.set('payment', new MockA2AClient('payment', 'Payment Agent', 41246));
+    this.agents.set('carbon-credit-negotiation', new MockA2AClient('carbon-credit-negotiation', 'Carbon Credit Negotiation Agent', 41251));
+    this.agents.set('carbon-credit-payment', new MockA2AClient('carbon-credit-payment', 'Carbon Credit Payment Agent', 41245));
+    this.agents.set('asset-broker', new MockA2AClient('asset-broker', 'Asset Broker Agent', 41242));
     
     console.log('🤖 Multi-Agent System Initialized');
     console.log('📋 Available Agents:');
@@ -72,109 +70,104 @@ class MultiAgentOrchestrator {
   async demonstrateMultiAgentCommunication(): Promise<void> {
     console.log('🚀 Starting Multi-Agent Communication Demo\n');
     
-    // Scenario 1: Travel Booking Request
-    await this.simulateTravelBooking();
+    // Scenario 1: Carbon Credit Purchase Request
+    await this.simulateCarbonCreditPurchase();
     
     console.log('\n' + '='.repeat(60) + '\n');
     
-    // Scenario 2: Payment Processing
-    await this.simulatePaymentProcessing();
+    // Scenario 2: Carbon Credit Payment Processing
+    await this.simulateCarbonCreditPayment();
     
     console.log('\n' + '='.repeat(60) + '\n');
     
-    // Scenario 3: Agent-to-Agent Negotiation
-    await this.simulateAgentNegotiation();
+    // Scenario 3: Agent-to-Agent Carbon Credit Negotiation
+    await this.simulateCarbonCreditNegotiation();
   }
 
-  private async simulateTravelBooking(): Promise<void> {
-    console.log('📋 SCENARIO 1: Travel Booking Request');
+  private async simulateCarbonCreditPurchase(): Promise<void> {
+    console.log('📋 SCENARIO 1: Carbon Credit Purchase Request');
     console.log('─'.repeat(40));
     
-    const travelAgent = this.agents.get('travel')!;
-    const flightAgent = this.agents.get('flight')!;
-    const hotelAgent = this.agents.get('hotel')!;
-    const paymentAgent = this.agents.get('payment')!;
+    const assetBroker = this.agents.get('asset-broker')!;
+    const negotiationAgent = this.agents.get('carbon-credit-negotiation')!;
+    const paymentAgent = this.agents.get('carbon-credit-payment')!;
     
-    // Step 1: User request to Travel Agent
-    console.log('\n👤 User Request: "Book a trip to Paris for 2 people"');
-    await travelAgent.processRequest('Book a trip to Paris for 2 people');
+    // Step 1: User request to Asset Broker
+    console.log('\n👤 User Request: "Purchase 10,000 carbon credits for corporate sustainability"');
+    await assetBroker.processRequest('Purchase 10,000 carbon credits for corporate sustainability');
     
-    // Step 2: Travel Agent coordinates with Flight Agent
-    console.log('\n🔄 Travel Agent coordinating with Flight Agent...');
-    const flightResponse = await travelAgent.sendMessage('Find flights to Paris for 2 people', 'flight');
-    console.log(`📨 Response: ${flightResponse}`);
+    // Step 2: Asset Broker coordinates with Carbon Credit Negotiation Agent
+    console.log('\n🔄 Asset Broker coordinating with Carbon Credit Negotiation Agent...');
+    const negotiationResponse = await assetBroker.sendMessage('Find best carbon credit offers for 10,000 credits', 'carbon-credit-negotiation');
+    console.log(`📨 Response: ${negotiationResponse}`);
     
-    // Step 3: Travel Agent coordinates with Hotel Agent
-    console.log('\n🔄 Travel Agent coordinating with Hotel Agent...');
-    const hotelResponse = await travelAgent.sendMessage('Find hotels in Paris for 2 people', 'hotel');
-    console.log(`📨 Response: ${hotelResponse}`);
-    
-    // Step 4: Travel Agent coordinates with Payment Agent
-    console.log('\n🔄 Travel Agent coordinating with Payment Agent...');
-    const paymentResponse = await travelAgent.sendMessage('Calculate total cost for Paris trip', 'payment');
+    // Step 3: Asset Broker coordinates with Carbon Credit Payment Agent
+    console.log('\n🔄 Asset Broker coordinating with Carbon Credit Payment Agent...');
+    const paymentResponse = await assetBroker.sendMessage('Process payment for 10,000 carbon credits using USDC', 'carbon-credit-payment');
     console.log(`📨 Response: ${paymentResponse}`);
     
-    // Step 5: Final coordination
+    // Step 4: Final coordination
     console.log('\n🤝 Final coordination between all agents...');
-    await travelAgent.processRequest('Finalize booking with all agents');
+    await assetBroker.processRequest('Finalize carbon credit purchase with all agents');
     
-    console.log('\n✅ Travel booking completed successfully!');
+    console.log('\n✅ Carbon credit purchase completed successfully!');
   }
 
-  private async simulatePaymentProcessing(): Promise<void> {
-    console.log('📋 SCENARIO 2: Payment Processing');
+  private async simulateCarbonCreditPayment(): Promise<void> {
+    console.log('📋 SCENARIO 2: Carbon Credit Payment Processing');
     console.log('─'.repeat(40));
     
-    const paymentAgent = this.agents.get('payment')!;
-    const travelAgent = this.agents.get('travel')!;
+    const paymentAgent = this.agents.get('carbon-credit-payment')!;
+    const negotiationAgent = this.agents.get('carbon-credit-negotiation')!;
     
     // Step 1: Payment request
-    console.log('\n👤 User Request: "Process payment of $1250 using HBAR tokens"');
-    await paymentAgent.processRequest('Process payment of $1250 using HBAR tokens');
+    console.log('\n👤 User Request: "Process payment for 5,000 carbon credits using HBAR tokens"');
+    await paymentAgent.processRequest('Process payment for 5,000 carbon credits using HBAR tokens');
     
-    // Step 2: Payment Agent communicates with Travel Agent
-    console.log('\n🔄 Payment Agent coordinating with Travel Agent...');
-    const travelResponse = await paymentAgent.sendMessage('Confirm booking details for payment', 'travel');
-    console.log(`📨 Response: ${travelResponse}`);
+    // Step 2: Payment Agent communicates with Negotiation Agent
+    console.log('\n🔄 Payment Agent coordinating with Carbon Credit Negotiation Agent...');
+    const negotiationResponse = await paymentAgent.sendMessage('Confirm carbon credit details for payment', 'carbon-credit-negotiation');
+    console.log(`📨 Response: ${negotiationResponse}`);
     
     // Step 3: Payment processing
-    console.log('\n💳 Processing payment...');
+    console.log('\n💳 Processing carbon credit payment...');
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    console.log('\n✅ Payment processed successfully!');
+    console.log('\n✅ Carbon credit payment processed successfully!');
     console.log('🔗 Transaction ID: 0x' + Math.random().toString(16).substr(2, 64));
-    console.log('💰 Amount: $1,250 USD');
+    console.log('🌿 Credits: 5,000 carbon credits');
+    console.log('💰 Amount: $75,000 USD');
     console.log('🪙 Token: HBAR');
   }
 
-  private async simulateAgentNegotiation(): Promise<void> {
-    console.log('📋 SCENARIO 3: Agent-to-Agent Negotiation');
+  private async simulateCarbonCreditNegotiation(): Promise<void> {
+    console.log('📋 SCENARIO 3: Agent-to-Agent Carbon Credit Negotiation');
     console.log('─'.repeat(40));
     
-    const flightAgent = this.agents.get('flight')!;
-    const hotelAgent = this.agents.get('hotel')!;
-    const paymentAgent = this.agents.get('payment')!;
+    const negotiationAgent = this.agents.get('carbon-credit-negotiation')!;
+    const paymentAgent = this.agents.get('carbon-credit-payment')!;
+    const assetBroker = this.agents.get('asset-broker')!;
     
-    // Step 1: Flight Agent initiates negotiation
-    console.log('\n✈️ Flight Agent: "I have a flight offer for $450"');
-    await flightAgent.processRequest('Flight offer: $450 for Paris route');
+    // Step 1: Negotiation Agent initiates offer
+    console.log('\n🌱 Carbon Credit Negotiation Agent: "I found carbon credits at $15 per credit"');
+    await negotiationAgent.processRequest('Carbon credit offer: $15 per credit from Company A');
     
-    // Step 2: Hotel Agent responds
-    console.log('\n🏨 Hotel Agent: "I can offer hotel for $650/night"');
-    await hotelAgent.processRequest('Hotel offer: $650/night in Paris');
+    // Step 2: Payment Agent responds
+    console.log('\n💳 Carbon Credit Payment Agent: "I can process payment with USDC or HBAR"');
+    await paymentAgent.processRequest('Payment options: USDC or HBAR for carbon credits');
     
-    // Step 3: Payment Agent calculates
-    console.log('\n💳 Payment Agent: "Calculating total package cost..."');
-    await paymentAgent.processRequest('Calculate package: Flight $450 + Hotel $650×5 nights');
+    // Step 3: Asset Broker coordinates
+    console.log('\n🤝 Asset Broker Agent: "Coordinating best deal for 10,000 credits..."');
+    await assetBroker.processRequest('Coordinate: 10,000 credits × $15 = $150,000');
     
     // Step 4: Agents negotiate
-    console.log('\n🤝 Agents negotiating package deal...');
+    console.log('\n🤝 Agents negotiating carbon credit package deal...');
     
     const negotiationRounds = [
-      { agent: 'Flight Agent', message: 'Can we reduce flight cost to $400?' },
-      { agent: 'Hotel Agent', message: 'I can offer $600/night for package deal' },
-      { agent: 'Payment Agent', message: 'Total would be $3,400 with discounts' },
-      { agent: 'Flight Agent', message: 'Deal accepted! Package price: $3,400' }
+      { agent: 'Carbon Credit Negotiation Agent', message: 'Can we get bulk discount for 10,000 credits?' },
+      { agent: 'Carbon Credit Payment Agent', message: 'I can offer 2% discount for USDC payment' },
+      { agent: 'Asset Broker Agent', message: 'Total would be $147,000 with payment discount' },
+      { agent: 'Carbon Credit Negotiation Agent', message: 'Deal accepted! Package price: $147,000' }
     ];
     
     for (const round of negotiationRounds) {
@@ -182,8 +175,8 @@ class MultiAgentOrchestrator {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
     
-    console.log('\n✅ Multi-agent negotiation completed!');
-    console.log('📋 Final Package: $3,400 USD');
+    console.log('\n✅ Multi-agent carbon credit negotiation completed!');
+    console.log('📋 Final Package: 10,000 carbon credits for $147,000 USD');
     console.log('🤝 All agents agreed on the deal');
   }
 
@@ -223,8 +216,8 @@ class MultiAgentOrchestrator {
 
 // Main execution
 async function main() {
-  console.log('🚀 Multi-Agent Communication Demo');
-  console.log('=====================================\n');
+  console.log('🚀 Multi-Agent Carbon Credit Communication Demo');
+  console.log('===============================================\n');
   
   const orchestrator = new MultiAgentOrchestrator();
   

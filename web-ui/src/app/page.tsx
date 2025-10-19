@@ -4,17 +4,17 @@ import React, { useState, useEffect } from 'react'
 import MultiAgentChat from '@/components/MultiAgentChat'
 
 // Error Boundary Component
-class ErrorBoundary extends React.Component {
-  constructor(props) {
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
+  constructor(props: {children: React.ReactNode}) {
     super(props)
     this.state = { hasError: false, error: null }
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error) {
     return { hasError: true, error }
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.log('Error caught by boundary:', error, errorInfo)
   }
 
@@ -91,11 +91,11 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-sm sm:text-lg md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
-                    Hedera Multi-Agent System
+                  <h1 className="text-sm sm:text-lg md:text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent truncate">
+                    Carbon Credit Trading Platform
                   </h1>
                   <p className="text-xs sm:text-xs text-gray-600 hidden sm:block truncate">
-                    Multi-Agent System powered by Hedera Agent Kit & Google A2A
+                    Multi-Agent Carbon Credit Trading powered by A2A Protocol
                   </p>
                 </div>
               </div>
@@ -136,29 +136,14 @@ export default function Home() {
               </div>
               
               <div className="p-4 space-y-3">
-                {/* Travel Agent */}
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-lg">✈️</span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">Travel Agent</h3>
-                    <p className="text-sm text-gray-600">Port: 41243</p>
-                    <div className="flex items-center mt-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      <span className="text-xs text-green-600">Online</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hotel Agent */}
+                {/* Carbon Credit Negotiation Agent */}
                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-green-50 border border-green-200">
                   <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-lg">🏨</span>
+                    <span className="text-white text-lg">🌱</span>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">Hotel Agent</h3>
-                    <p className="text-sm text-gray-600">Port: 41244</p>
+                    <h3 className="font-medium text-gray-900">Carbon Credit Negotiation</h3>
+                    <p className="text-sm text-gray-600">Port: 41251</p>
                     <div className="flex items-center mt-1">
                       <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                       <span className="text-xs text-green-600">Online</span>
@@ -166,28 +151,13 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Flight Agent */}
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
-                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-lg">🛫</span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">Flight Agent</h3>
-                    <p className="text-sm text-gray-600">Port: 41246</p>
-                    <div className="flex items-center mt-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      <span className="text-xs text-green-600">Online</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Agent */}
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
-                  <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+                {/* Carbon Credit Payment Agent */}
+                <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                     <span className="text-white text-lg">💳</span>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">Payment Agent</h3>
+                    <h3 className="font-medium text-gray-900">Carbon Credit Payment</h3>
                     <p className="text-sm text-gray-600">Port: 41245</p>
                     <div className="flex items-center mt-1">
                       <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
@@ -196,20 +166,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Asset Broker Agent */}
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-indigo-50 border border-indigo-200">
-                  <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-lg">🤝</span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">Asset Broker</h3>
-                    <p className="text-sm text-gray-600">Port: 41250</p>
-                    <div className="flex items-center mt-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      <span className="text-xs text-green-600">Online</span>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

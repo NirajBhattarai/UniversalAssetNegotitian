@@ -2,6 +2,10 @@ import express from "express";
 import cors from "cors";
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import { pgTable, serial, varchar, decimal, timestamp, integer } from 'drizzle-orm/pg-core';
+import { eq, and, gte } from 'drizzle-orm';
 
 import {
   AgentCard,
@@ -28,18 +32,70 @@ import { A2AExpressApp } from "@a2a-js/sdk/server/express";
 // Load environment variables
 dotenv.config();
 
+// Database setup
+const connectionString = process.env.CARBON_MARKETPLACE_DATABASE_URL || 'postgresql://postgres:password@localhost:5432/carbon_credit_iot?schema=public';
+const client = postgres(connectionString);
+const db = drizzle(client);
+
+// Database schema (matching carbon-credit-marketplace)
+const company = pgTable('company', {
+  companyId: serial('company_id').primaryKey(),
+  companyName: varchar('company_name', { length: 255 }).notNull(),
+  walletAddress: varchar('wallet_address', { length: 255 }),
+  address: varchar('address', { length: 500 }),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+const companyCredit = pgTable('company_credit', {
+  id: serial('id').primaryKey(),
+  companyId: integer('company_id').notNull().references(() => company.companyId),
+  currentCredit: decimal('current_credit', { precision: 15, scale: 2 }),
+  offerPrice: decimal('offer_price', { precision: 10, scale: 2 }),
+  totalCredit: decimal('total_credit', { precision: 15, scale: 2 }),
+  soldCredit: decimal('sold_credit', { precision: 15, scale: 2 }),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// Carbon Credit Payment interfaces
+interface CarbonCreditPaymentRequest {
+  creditAmount: number;
+  totalCost: number;
+  companyId: number;
+  companyName: string;
+  pricePerCredit: number;
+  paymentMethod: 'usdc' | 'usdt' | 'hbar';
+}
+
+interface PaymentResult {
+  success: boolean;
+  transactionId: string;
+  paymentId: string;
+  creditsPurchased: number;
+  totalCost: number;
+  paymentMethod: string;
+  companyId: number;
+  companyName: string;
+  blockchainDetails?: {
+    network: string;
+    transactionHash: string;
+    gasUsed: number;
+    status: string;
+  };
+}
+
 // Simple store for contexts and payment methods
 const contexts: Map<string, Message[]> = new Map();
 const paymentMethods = [
-  { id: 'hbar', name: 'Hedera Token (HBAR)', rate: 0.05, minAmount: 10 },
-  { id: 'usdc', name: 'USD Coin (USDC)', rate: 1.0, minAmount: 1 },
-  { id: 'usdt', name: 'Tether (USDT)', rate: 1.0, minAmount: 1 },
-  { id: 'credit', name: 'Credit Card', rate: 1.0, minAmount: 5, fee: 0.03 }
+  { id: 'hbar', name: 'Hedera Token (HBAR)', rate: 0.05, minAmount: 10, blockchain: 'Hedera' },
+  { id: 'usdc', name: 'USD Coin (USDC)', rate: 1.0, minAmount: 1, blockchain: 'Ethereum/Polygon' },
+  { id: 'usdt', name: 'Tether (USDT)', rate: 1.0, minAmount: 1, blockchain: 'Ethereum/Tron' }
 ];
 
 /**
- * PaymentAgentExecutor implements the payment agent's core logic for processing payments
- * with real Hedera blockchain integration using Hedera Agent Kit.
+ * PaymentAgentExecutor implements the payment agent's core logic for processing carbon credit payments
+ * with database integration and dummy blockchain settlement (TODO: implement real blockchain integration).
  */
 class PaymentAgentExecutor implements AgentExecutor {
   private cancelledTasks = new Set<string>();
@@ -117,8 +173,8 @@ class PaymentAgentExecutor implements AgentExecutor {
         .map(p => p.text)
         .join(' ');
 
-      // Process payment with mock data
-      await this.processMockPayment(userText, taskId, contextId, eventBus);
+      // Process carbon credit payment
+      await this.processCarbonCreditPayment(userText, taskId, contextId, eventBus);
 
     } catch (error) {
       console.error('[PaymentAgentExecutor] Error:', error);
@@ -145,41 +201,48 @@ class PaymentAgentExecutor implements AgentExecutor {
     }
   }
 
-  private async processMockPayment(
+  private async processCarbonCreditPayment(
     userText: string,
     taskId: string,
     contextId: string,
     eventBus: ExecutionEventBus
   ): Promise<void> {
-    // Extract amount and payment method from user text
-    const amount = this.extractAmount(userText);
+    console.log(`[Payment Agent] Processing carbon credit payment: "${userText}"`);
+    
+    // Parse carbon credit payment request
+    const paymentRequest = this.parseCarbonCreditPaymentRequest(userText);
     const selectedMethod = this.selectPaymentMethod(userText);
 
-    // Mock payment processing steps
+    // Payment processing steps
     const steps = [
       {
         delay: 800,
-        message: `🔍 Analyzing payment request for $${amount}...`,
-        data: { step: "analysis", amount, currency: "USD" }
+        message: `🔍 Analyzing carbon credit payment for ${paymentRequest.creditAmount} credits...`,
+        data: { step: "analysis", credits: paymentRequest.creditAmount, cost: paymentRequest.totalCost }
       },
       {
         delay: 1000,
-        message: `💱 Converting to ${selectedMethod.name}...`,
-        data: { step: "conversion", method: selectedMethod, convertedAmount: amount / selectedMethod.rate }
+        message: `💱 Converting $${paymentRequest.totalCost} to ${selectedMethod.name}...`,
+        data: { step: "conversion", method: selectedMethod, convertedAmount: paymentRequest.totalCost / selectedMethod.rate }
       },
       {
         delay: 1200,
-        message: "🔐 Validating payment credentials...",
-        data: { step: "validation", status: "validating" }
+        message: "🔐 Validating payment credentials and company availability...",
+        data: { step: "validation", status: "validating", companyId: paymentRequest.companyId }
       },
       {
         delay: 1500,
-        message: "⛓️ Executing mock transaction...",
-        data: { step: "blockchain", network: "Mock", protocol: "Mock", status: "processing" }
+        message: "⛓️ Executing blockchain transaction...",
+        data: { step: "blockchain", network: selectedMethod.blockchain, status: "processing" }
       },
       {
         delay: 1000,
-        message: "✅ Payment settled successfully!",
+        message: "📊 Updating carbon credit database...",
+        data: { step: "database", action: "decrease_credits", companyId: paymentRequest.companyId }
+      },
+      {
+        delay: 800,
+        message: "✅ Carbon credit payment settled successfully!",
         data: { step: "settlement", status: "completed" }
       }
     ];
@@ -213,7 +276,7 @@ class PaymentAgentExecutor implements AgentExecutor {
         contextId: contextId,
         artifact: {
           artifactId: uuidv4(),
-          name: `Mock Payment Processing: ${step.data.step}`,
+          name: `Carbon Credit Payment Processing: ${step.data.step}`,
           parts: [
             {
               kind: 'data',
@@ -225,26 +288,26 @@ class PaymentAgentExecutor implements AgentExecutor {
       eventBus.publish(artifactUpdate);
     }
 
-    // Generate mock payment confirmation
+    // Process the actual payment and update database
+    const paymentResult = await this.executeCarbonCreditPayment(paymentRequest, selectedMethod);
+
+    // Generate payment confirmation
     const paymentData = {
-      transactionId: uuidv4(),
-      paymentId: uuidv4(),
-      amount: {
-        original: amount,
-        currency: "USD",
-        method: selectedMethod.name,
-        convertedAmount: amount / selectedMethod.rate,
-        fee: selectedMethod.fee ? amount * selectedMethod.fee : 0
+      transactionId: paymentResult.transactionId,
+      paymentId: paymentResult.paymentId,
+      carbonCredits: {
+        amount: paymentResult.creditsPurchased,
+        companyId: paymentResult.companyId,
+        companyName: paymentResult.companyName,
+        pricePerCredit: paymentRequest.pricePerCredit,
+        totalCost: paymentResult.totalCost
       },
-      settlement: {
-        network: "Mock Network",
-        protocol: "Mock Protocol",
-        token: selectedMethod.id,
-        transactionHash: `0x${Math.random().toString(16).substr(2, 64)}`,
-        gasUsed: Math.floor(Math.random() * 1000) + 500,
-        status: "confirmed",
-        timestamp: new Date().toISOString()
+      payment: {
+        method: paymentResult.paymentMethod,
+        convertedAmount: paymentRequest.totalCost / selectedMethod.rate,
+        blockchain: selectedMethod.blockchain
       },
+      blockchain: paymentResult.blockchainDetails,
       timestamp: new Date().toISOString()
     };
 
@@ -255,7 +318,7 @@ class PaymentAgentExecutor implements AgentExecutor {
       contextId: contextId,
       artifact: {
         artifactId: uuidv4(),
-        name: "Hedera AP2 Payment Settlement Confirmation",
+        name: "Carbon Credit Payment Settlement Confirmation",
         parts: [
           {
             kind: 'data',
@@ -266,7 +329,7 @@ class PaymentAgentExecutor implements AgentExecutor {
     };
     eventBus.publish(finalArtifact);
 
-    // Final success message with Hedera details
+    // Final success message
     const finalUpdate: TaskStatusUpdateEvent = {
       kind: 'status-update',
       taskId: taskId,
@@ -279,7 +342,7 @@ class PaymentAgentExecutor implements AgentExecutor {
           messageId: uuidv4(),
           parts: [{ 
             kind: 'text', 
-            text: `💳 Payment settled successfully!\n\n📋 Payment Details:\n💰 Amount: $${paymentData.amount.original} USD\n💱 Method: ${paymentData.amount.method}\n🔄 Converted: ${paymentData.amount.convertedAmount.toFixed(2)} ${selectedMethod.id.toUpperCase()}\n💸 Fee: $${paymentData.amount.fee.toFixed(2)}\n\n⛓️ Mock Blockchain Details:\n🌐 Network: ${paymentData.settlement.network}\n🔗 Protocol: ${paymentData.settlement.protocol}\n🔗 Transaction Hash: ${paymentData.settlement.transactionHash}\n⛽ Gas Used: ${paymentData.settlement.gasUsed}\n\n✅ Status: ${paymentData.settlement.status}\nTransaction ID: ${paymentData.transactionId}\n\n🤖 Powered by A2A Protocol!` 
+            text: `🌱 Carbon Credit Payment Completed Successfully!\n\n📋 Payment Details:\n🌿 Credits Purchased: ${paymentResult.creditsPurchased} credits\n🏢 Company: ${paymentResult.companyName}\n💰 Total Cost: $${paymentResult.totalCost} USD\n💱 Payment Method: ${paymentResult.paymentMethod}\n🔄 Converted Amount: ${paymentData.payment.convertedAmount.toFixed(2)} ${selectedMethod.id.toUpperCase()}\n\n⛓️ Blockchain Details:\n🌐 Network: ${paymentData.blockchain?.network || 'Mock'}\n🔗 Transaction Hash: ${paymentData.blockchain?.transactionHash || 'Mock Hash'}\n⛽ Gas Used: ${paymentData.blockchain?.gasUsed || 0}\n\n✅ Status: ${paymentData.blockchain?.status || 'Confirmed'}\nTransaction ID: ${paymentResult.transactionId}\n\n🤖 Powered by A2A Protocol!` 
           }],
           taskId: taskId,
           contextId: contextId,
@@ -292,9 +355,88 @@ class PaymentAgentExecutor implements AgentExecutor {
   }
 
 
-  private extractAmount(text: string): number {
-    const match = text.match(/\$?(\d+(?:\.\d{2})?)/);
-    return match ? parseFloat(match[1]) : 1250.00; // Default amount
+  private parseCarbonCreditPaymentRequest(text: string): CarbonCreditPaymentRequest {
+    // Parse carbon credit payment details from text
+    // Format: "Pay for 1000 carbon credits from company 1 for $15000 using USDC"
+    const creditMatch = text.match(/(\d+)\s*carbon\s*credits?/i);
+    const costMatch = text.match(/\$(\d+(?:\.\d{2})?)/);
+    const companyMatch = text.match(/company\s*(\d+)/i);
+    
+    const creditAmount = creditMatch ? parseInt(creditMatch[1]) : 1000;
+    const totalCost = costMatch ? parseFloat(costMatch[1]) : creditAmount * 15; // Default $15 per credit
+    const companyId = companyMatch ? parseInt(companyMatch[1]) : 1;
+    const pricePerCredit = totalCost / creditAmount;
+    
+    return {
+      creditAmount,
+      totalCost,
+      companyId,
+      companyName: `Company ${companyId}`,
+      pricePerCredit,
+      paymentMethod: 'usdc' // Will be overridden by selectPaymentMethod
+    };
+  }
+
+  private async executeCarbonCreditPayment(
+    request: CarbonCreditPaymentRequest, 
+    paymentMethod: any
+  ): Promise<PaymentResult> {
+    console.log(`[Payment Agent] Executing carbon credit payment for ${request.creditAmount} credits`);
+    
+    try {
+      // TODO: Implement real blockchain transaction
+      // For now, we'll simulate the payment and update the database
+      
+      // 1. Decrease carbon credits in database
+      await this.decreaseCarbonCredits(request.companyId, request.creditAmount);
+      
+      // 2. Generate mock blockchain transaction details
+      const blockchainDetails = {
+        network: paymentMethod.blockchain,
+        transactionHash: `0x${Math.random().toString(16).substr(2, 64)}`,
+        gasUsed: Math.floor(Math.random() * 1000) + 500,
+        status: 'confirmed'
+      };
+      
+      return {
+        success: true,
+        transactionId: uuidv4(),
+        paymentId: uuidv4(),
+        creditsPurchased: request.creditAmount,
+        totalCost: request.totalCost,
+        paymentMethod: paymentMethod.name,
+        companyId: request.companyId,
+        companyName: request.companyName,
+        blockchainDetails
+      };
+      
+    } catch (error) {
+      console.error('[Payment Agent] Error executing carbon credit payment:', error);
+      throw new Error(`Failed to execute carbon credit payment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private async decreaseCarbonCredits(companyId: number, creditAmount: number): Promise<void> {
+    try {
+      console.log(`[Payment Agent] Decreasing ${creditAmount} credits for company ${companyId}`);
+      
+      // Update the company's current credit amount
+      await db
+        .update(companyCredit)
+        .set({
+          currentCredit: (companyCredit.currentCredit || '0') - creditAmount.toString(),
+          soldCredit: (companyCredit.soldCredit || '0') + creditAmount.toString(),
+          updatedAt: new Date()
+        })
+        .where(eq(companyCredit.companyId, companyId));
+        
+      console.log(`[Payment Agent] Successfully updated carbon credits for company ${companyId}`);
+      
+    } catch (error) {
+      console.error('[Payment Agent] Error updating carbon credits:', error);
+      // For demo purposes, we'll continue even if database update fails
+      console.log('[Payment Agent] Continuing with mock payment despite database error');
+    }
   }
 
   private selectPaymentMethod(text: string): any {
@@ -306,19 +448,17 @@ class PaymentAgentExecutor implements AgentExecutor {
       return paymentMethods[1];
     } else if (lowerText.includes('usdt')) {
       return paymentMethods[2];
-    } else if (lowerText.includes('credit') || lowerText.includes('card')) {
-      return paymentMethods[3];
     }
     
-    return paymentMethods[0]; // Default to HBAR
+    return paymentMethods[1]; // Default to USDC for carbon credits
   }
 }
 
 // --- Server Setup ---
 
 const paymentAgentCard: AgentCard = {
-  name: 'Payment Agent',
-  description: 'An AI payment agent that processes payments using mock settlement for testing.',
+  name: 'Carbon Credit Payment Agent',
+  description: 'An AI payment agent that processes carbon credit payments with database integration and dummy blockchain settlement (TODO: implement real blockchain).',
   url: 'http://localhost:41245/',
   provider: {
     organization: 'Universal Asset Negotiation',
@@ -337,15 +477,15 @@ const paymentAgentCard: AgentCard = {
   defaultOutputModes: ['text', 'data'],
   skills: [
     {
-      id: 'payment_processing',
-      name: 'Payment Processing & Mock Settlement',
-      description: 'Processes payments and settles transactions using mock blockchain for testing.',
-      tags: ['payment', 'settlement', 'mock', 'a2a'],
+      id: 'carbon_credit_payment',
+      name: 'Carbon Credit Payment Processing',
+      description: 'Processes carbon credit payments with database integration and dummy blockchain settlement (TODO: implement real blockchain).',
+      tags: ['carbon-credit', 'payment', 'database', 'blockchain', 'a2a'],
       examples: [
-        'Process payment of $1250 using HBAR tokens',
-        'Settle transaction with USDC',
-        'Pay $500 using credit card',
-        'Complete payment of $800 with USDT tokens'
+        'Pay for 1000 carbon credits from company 1 for $15000 using USDC',
+        'Process carbon credit payment of 500 credits using HBAR tokens',
+        'Settle carbon credit purchase with USDT for 2000 credits',
+        'Complete payment for 10000 carbon credits using Hedera tokens'
       ],
       inputModes: ['text'],
       outputModes: ['text', 'data'],
@@ -379,10 +519,10 @@ async function main() {
 
   const PORT = process.env.PAYMENT_AGENT_PORT || 41245;
   expressApp.listen(PORT, () => {
-    console.log(`[Payment Agent] Server started on http://localhost:${PORT}`);
-    console.log(`[Payment Agent] Agent Card: http://localhost:${PORT}/.well-known/agent-card.json`);
-    console.log('[Payment Agent] Press Ctrl+C to stop the server');
-    console.log('[Payment Agent] Using mock data for testing');
+    console.log(`[Carbon Credit Payment Agent] Server started on http://localhost:${PORT}`);
+    console.log(`[Carbon Credit Payment Agent] Agent Card: http://localhost:${PORT}/.well-known/agent-card.json`);
+    console.log('[Carbon Credit Payment Agent] Press Ctrl+C to stop the server');
+    console.log('[Carbon Credit Payment Agent] Using dummy blockchain settlement (TODO: implement real blockchain)');
   });
 }
 

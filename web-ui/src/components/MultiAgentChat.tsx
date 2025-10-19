@@ -34,7 +34,7 @@ export default function MultiAgentChat() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [agents, setAgents] = useState<Agent[]>([]);
-  const [selectedAgent, setSelectedAgent] = useState<string>('travel');
+  const [selectedAgent, setSelectedAgent] = useState<string>('carbon-credit-negotiation');
   const [chatMode, setChatMode] = useState<'agents' | 'hedera' | 'negotiation'>('agents');
   const [hederaMessages, setHederaMessages] = useState<HederaMessage[]>([]);
   const [isHederaLoading, setIsHederaLoading] = useState(false);
@@ -75,7 +75,7 @@ export default function MultiAgentChat() {
       id: 'welcome',
       role: 'agent',
       agentName: 'System',
-      content: '🤖 Welcome to the Multi-Agent Travel System!\n\nI can help you coordinate with specialized agents:\n\n🌍 **Travel Agent** - Master coordinator for complete travel bookings\n💳 **Payment Agent** - Hedera token payment processing via AP2\n🏨 **Hotel Agent** - Accommodation search and negotiation\n✈️ **Flight Agent** - Flight booking and rate negotiation\n\nTry asking: "Book a trip to Paris for 2 people" or "Process a payment of $1000 using HBAR tokens"',
+      content: '🌱 Welcome to the Carbon Credit Trading Platform!\n\nI can help you trade carbon credits with specialized agents:\n\n🌱 **Carbon Credit Negotiation Agent** - Find best carbon credit offers from marketplace\n💳 **Carbon Credit Payment Agent** - Process payments with USDC/USDT/HBAR\n\nTry asking: "Find 10,000 carbon credits at best price" or "Process payment for 5,000 carbon credits using USDC"',
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -200,70 +200,43 @@ export default function MultiAgentChat() {
     // Add initial user request
     addNegotiationStep('User', userRequest, 'request');
     
-    // Wait before starting negotiation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Phase 1: Travel Agent Analysis
-    addNegotiationStep('Travel Agent', '🔍 Received your travel request. Analyzing requirements...', 'status');
-    addThinkingStep('Travel Agent', 3000);
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    addNegotiationStep('Travel Agent', '📋 Breaking down your request:\n• Destination: Paris\n• Travelers: 2 people\n• Duration: 5 days\n• Budget: To be determined', 'response');
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    // Phase 2: Flight Agent Search
-    addNegotiationStep('Travel Agent', '🔄 Contacting Flight Agent for availability...', 'status');
-    addThinkingStep('Flight Agent', 2000);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    addNegotiationStep('Flight Agent', '✈️ Searching flight databases for Paris routes...', 'status');
-    addThinkingStep('Flight Agent', 4000);
-    await new Promise(resolve => setTimeout(resolve, 4000));
-    
-    addNegotiationStep('Flight Agent', '🎯 Found 3 flight options:\n• SkyHigh Airlines: $450 (Economy)\n• AirFrance: $520 (Economy)\n• Lufthansa: $480 (Economy)\n\nRecommendation: SkyHigh Airlines for best value', 'response');
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Phase 3: Hotel Agent Search
-    addNegotiationStep('Travel Agent', '🔄 Contacting Hotel Agent for accommodations...', 'status');
-    addThinkingStep('Hotel Agent', 2000);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    addNegotiationStep('Hotel Agent', '🏨 Searching hotel inventory in Paris...', 'status');
-    addThinkingStep('Hotel Agent', 3500);
-    await new Promise(resolve => setTimeout(resolve, 3500));
-    
-    addNegotiationStep('Hotel Agent', '🛏️ Found 5 hotel options:\n• Grand Plaza Hotel: $650/night (4-star)\n• Hotel de Paris: $450/night (3-star)\n• Champs Elysees Hotel: $800/night (5-star)\n• Budget Inn: $200/night (2-star)\n• Boutique Hotel: $550/night (3-star)\n\nRecommendation: Grand Plaza Hotel for comfort and location', 'response');
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Phase 4: Payment Agent Calculation
-    addNegotiationStep('Travel Agent', '🔄 Contacting Payment Agent for cost calculation...', 'status');
-    addThinkingStep('Payment Agent', 2000);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    addNegotiationStep('Payment Agent', '💳 Calculating total costs and payment options...', 'status');
-    addThinkingStep('Payment Agent', 3000);
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    addNegotiationStep('Payment Agent', '💰 Total Cost Breakdown:\n• Flight: $450 × 2 = $900\n• Hotel: $650 × 5 nights = $3,250\n• Total: $4,150 USD\n\nPayment Methods Available:\n• HBAR: 83,000 HBAR (estimated)\n• USDC: 4,150 USDC\n• Credit Card: $4,150 + 2.5% fee', 'response');
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Phase 5: Final Coordination
-    addNegotiationStep('Travel Agent', '🤝 Coordinating final details with all agents...', 'status');
-    addThinkingStep('Travel Agent', 2500);
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    addNegotiationStep('Flight Agent', '✅ Flight booking confirmed: SkyHigh Airlines SH123', 'response');
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    addNegotiationStep('Hotel Agent', '✅ Hotel reservation confirmed: Grand Plaza Hotel, Deluxe Suite', 'response');
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    addNegotiationStep('Payment Agent', '✅ Payment processing ready. Awaiting your preferred method.', 'response');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    addNegotiationStep('Travel Agent', '🎉 Multi-agent negotiation completed successfully!\n\n📋 Final Package:\n• Flight: SkyHigh Airlines SH123 - $900\n• Hotel: Grand Plaza Hotel (5 nights) - $3,250\n• Total: $4,150 USD\n\n🔗 All agents are synchronized and ready for payment processing.\n\n💡 You can now proceed with payment using HBAR, USDC, or Credit Card.', 'result');
-    
-    setIsNegotiating(false);
+    try {
+      // Phase 1: Carbon Credit Negotiation Agent Search
+      addNegotiationStep('Carbon Credit Negotiation Agent', '🔍 Received your carbon credit request. Analyzing marketplace...', 'status');
+      addThinkingStep('Carbon Credit Negotiation Agent', 2000);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const negotiationResponse = await a2aAgentService.sendMessageToAgent(userRequest, 'carbon-credit-negotiation');
+      if (negotiationResponse.success && negotiationResponse.response) {
+        addNegotiationStep('Carbon Credit Negotiation Agent', negotiationResponse.response, 'response');
+      } else {
+        addNegotiationStep('Carbon Credit Negotiation Agent', `❌ Error: ${negotiationResponse.error || 'No response from Negotiation Agent'}`, 'response');
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Phase 2: Payment Agent Calculation
+      addNegotiationStep('Carbon Credit Payment Agent', '🔄 Processing payment for carbon credits...', 'status');
+      addThinkingStep('Carbon Credit Payment Agent', 2000);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const paymentResponse = await a2aAgentService.sendMessageToAgent(userRequest, 'carbon-credit-payment');
+      if (paymentResponse.success && paymentResponse.response) {
+        addNegotiationStep('Carbon Credit Payment Agent', paymentResponse.response, 'response');
+      } else {
+        addNegotiationStep('Carbon Credit Payment Agent', `❌ Error: ${paymentResponse.error || 'No response from Payment Agent'}`, 'response');
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Phase 3: Final Summary
+      addNegotiationStep('System', '🤝 Carbon credit transaction completed!\n\nAll agents have been contacted and responses received. Check individual agent responses above for detailed information.', 'result');
+      
+    } catch (error) {
+      addNegotiationStep('System', `❌ Error during negotiation: ${error instanceof Error ? error.message : 'Unknown error'}`, 'result');
+    } finally {
+      setIsNegotiating(false);
+    }
   };
 
   const sendMessageToAgent = async (message: string, agentId: string) => {
@@ -317,10 +290,8 @@ export default function MultiAgentChat() {
 
   const getAgentIcon = (agentId: string) => {
     const icons = {
-      travel: '🌍',
-      payment: '💳',
-      hotel: '🏨',
-      flight: '✈️'
+      'carbon-credit-negotiation': '🌱',
+      'carbon-credit-payment': '💳'
     };
     return icons[agentId as keyof typeof icons] || '🤖';
   };
@@ -507,8 +478,8 @@ export default function MultiAgentChat() {
                 <div className="w-20 h-20 bg-gradient-to-r from-green-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-10 h-10 text-green-600" />
                 </div>
-                <p className="text-xl font-semibold mb-3">Live Multi-Agent Negotiation</p>
-                <p className="text-sm">Watch agents negotiate in real-time! Try: "Book a trip to Paris for 2 people"</p>
+                <p className="text-xl font-semibold mb-3">Live Multi-Agent Carbon Credit Negotiation</p>
+                <p className="text-sm">Watch agents negotiate carbon credit deals in real-time! Try: "Find 10,000 carbon credits at best price"</p>
               </div>
             ) : (
               negotiationSteps.map((step) => (
@@ -611,7 +582,7 @@ export default function MultiAgentChat() {
               chatMode === 'hedera' 
                 ? "Ask about your HBAR balance, account info, or Hedera operations..." 
                 : chatMode === 'negotiation'
-                ? "Start a negotiation: 'Book a trip to Paris for 2 people'..."
+                ? "Start a carbon credit negotiation: 'Find 10,000 carbon credits at best price'..."
                 : `Message ${agents.find(a => a.id === selectedAgent)?.name}...`
             }
             className={`flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent bg-white shadow-sm ${
@@ -646,8 +617,8 @@ export default function MultiAgentChat() {
             {chatMode === 'hedera' 
               ? 'Try: "What\'s my HBAR balance?" or "Show my account information"'
               : chatMode === 'negotiation'
-              ? 'Try: "Book a trip to Paris for 2 people" or "Plan a vacation to Tokyo"'
-              : 'Try: "Book a trip to Paris for 2 people" or "Process payment with HBAR tokens"'
+              ? 'Try: "Find 10,000 carbon credits at best price" or "Buy 5,000 carbon credits using USDC"'
+              : 'Try: "Find 10,000 carbon credits at best price" or "Process payment for 5,000 carbon credits using USDC"'
             }
           </span>
         </div>

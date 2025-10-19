@@ -1,10 +1,10 @@
-# Hedera Multi-Agent System
+# Carbon Credit Multi-Agent Trading System
 
-A sophisticated multi-agent system powered by Hedera Agent Kit and Google A2A protocol for automated asset negotiation, verification, and settlement across multiple domains including travel, finance, and digital assets.
+A sophisticated multi-agent system powered by Hedera Agent Kit and Google A2A protocol for automated carbon credit negotiation, verification, and settlement.
 
 ## 🎯 Project Overview
 
-This system demonstrates a universal multi-agent architecture where specialized agents can negotiate, coordinate, and execute complex transactions using the A2A (Agent-to-Agent) protocol. The system showcases real-time agent communication, blockchain integration with Hedera, and a modern web interface for user interaction.
+This system demonstrates a carbon credit focused multi-agent architecture where specialized agents can negotiate, coordinate, and execute carbon credit transactions using the A2A (Agent-to-Agent) protocol. The system showcases real-time agent communication, blockchain integration with Hedera, and a modern web interface for carbon credit trading.
 
 ## 🏗️ System Architecture
 
@@ -13,7 +13,7 @@ This system demonstrates a universal multi-agent architecture where specialized 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Web UI (Next.js)                         │
-│              Multi-Agent Chat Interface                     │
+│              Carbon Credit Trading Interface                │
 └─────────────────────┬───────────────────────────────────────┘
                       │ HTTP/WebSocket
 ┌─────────────────────┴───────────────────────────────────────┐
@@ -22,15 +22,15 @@ This system demonstrates a universal multi-agent architecture where specialized 
 └─────────────────────┬───────────────────────────────────────┘
                       │ A2A Protocol
 ┌─────────────────────┴───────────────────────────────────────┐
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────┐ │
-│  │Travel Agent │ │Hotel Agent  │ │Flight Agent │ │Payment  │ │
-│  │             │ │             │ │             │ │Agent    │ │
-│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────┘ │
-└─────────────────────────────────────────────────────────────┘
-                      │ Hedera Integration
+│  ┌─────────────────────┐  ┌─────────────────────┐          │
+│  │ Carbon Credit       │  │ Carbon Credit       │          │
+│  │ Negotiation Agent   │  │ Payment Agent       │          │
+│  └─────────────────────┘  └─────────────────────┘          │
+└─────────────────────┬───────────────────────────────────────┘
+                      │ Database Integration
 ┌─────────────────────┴───────────────────────────────────────┐
-│                Hedera Blockchain                            │
-│            (Smart Contracts & Settlement)                  │
+│                Carbon Credit Marketplace                    │
+│              PostgreSQL Database                            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -55,45 +55,23 @@ Each agent follows a standardized architecture:
 
 ## 🤖 Agent Specifications
 
-### Travel Agent (Port 41243)
-- **Purpose**: Coordinates complex travel itineraries
+### Carbon Credit Negotiation Agent (Port 41251)
+- **Purpose**: Finds and negotiates the best carbon credit offers
 - **Capabilities**: 
-  - Multi-destination trip planning
-  - Budget optimization
-  - Real-time availability checking
-  - Integration with flight and hotel agents
+  - Real-time database integration with carbon credit marketplace
+  - Price comparison and optimization
+  - Volume-based negotiation
+  - Payment method flexibility (USDC, USDT, HBAR, Bank Transfer)
+  - Company filtering and verification
 
-### Hotel Agent (Port 41244)
-- **Purpose**: Manages accommodation bookings and negotiations
+### Carbon Credit Payment Agent (Port 41245)
+- **Purpose**: Processes carbon credit payments and manages transactions
 - **Capabilities**:
-  - Hotel inventory management
-  - Price negotiation
-  - Amenity matching
-  - Booking confirmation and modifications
-
-### Flight Agent (Port 41246)
-- **Purpose**: Handles flight search, booking, and management
-- **Capabilities**:
-  - Multi-airline search
-  - Price comparison
-  - Seat selection
-  - Flight status monitoring
-
-### Payment Agent (Port 41245)
-- **Purpose**: Manages financial transactions and settlements
-- **Capabilities**:
-  - Multi-currency support
-  - Hedera blockchain integration
-  - Smart contract execution
-  - Payment verification and confirmation
-
-### Asset Broker Agent (Port 41250)
-- **Purpose**: Coordinates complex asset negotiations
-- **Capabilities**:
-  - Multi-asset type support
-  - Cross-agent coordination
-  - Settlement orchestration
-  - Risk assessment
+  - Payment processing for carbon credit purchases
+  - Database integration for credit reduction
+  - Multiple payment methods (USDC, USDT, HBAR, Bank Transfer)
+  - Transaction verification and confirmation
+  - Future blockchain integration (TODO)
 
 ## 🚀 Quick Start
 
@@ -120,11 +98,9 @@ Each agent follows a standardized architecture:
    cd web-ui && npm install && cd ..
    
    # Install agent dependencies
-   cd agents/travel-agent && npm install && cd ../..
-   cd agents/hotel-agent && npm install && cd ../..
-   cd agents/flight-agent && npm install && cd ../..
    cd agents/payment-agent && npm install && cd ../..
    cd agents/asset-broker-agent && npm install && cd ../..
+   cd agents/carbon-credit-negotiation-agent && npm install && cd ../..
    ```
 
 3. **Environment Setup**
@@ -151,20 +127,15 @@ npm run ui:dev
 #### Option 2: Start Components Individually
 
 ```bash
-# Terminal 1: Travel Agent
-npm run agents:travel-agent
+# Terminal 1: Carbon Credit Negotiation Agent
+npm run agents:carbon-credit-negotiation
 
-# Terminal 2: Hotel Agent
-npm run agents:hotel-agent
-
-# Terminal 3: Flight Agent
-npm run agents:flight-agent
-
-# Terminal 4: Payment Agent
+# Terminal 2: Carbon Credit Payment Agent
 npm run agents:payment-agent
 
-# Terminal 5: Asset Broker Agent
+# Terminal 3: Asset Broker Agent
 npm run agents:asset-broker
+```
 
 # Terminal 6: Web UI
 npm run ui:dev
@@ -195,17 +166,43 @@ This demo showcases:
 - Hedera blockchain settlement
 - End-to-end transaction flow
 
-### Multi-Agent Negotiation Demo
+### Multi-Agent Carbon Credit Demo
 
 ```bash
-npm run demo:negotiation
+npm run demo:multi-agent
 ```
 
 This demo demonstrates:
-- Complex asset negotiation scenarios
+- Carbon credit purchase coordination between agents
+- Multi-agent carbon credit payment processing
+- Agent-to-agent carbon credit negotiation
 - Cross-agent communication patterns
-- Blockchain integration examples
-- Payment settlement workflows
+- Database integration for real-time data
+- Payment settlement workflows (bypassing blockchain for now)
+
+### Carbon Credit Negotiation Demo
+
+```bash
+npm run demo:carbon-credit
+```
+
+This demo showcases:
+- Carbon credit marketplace database integration
+- Price negotiation and comparison
+- Company offer analysis
+- Settlement recommendations
+
+### Carbon Credit Payment Demo
+
+```bash
+npm run demo:carbon-credit-payment
+```
+
+This demo showcases:
+- Carbon credit payment processing with USDC/USDT/HBAR
+- Database integration for credit tracking
+- Dummy blockchain settlement (TODO: implement real blockchain)
+- Payment confirmation and transaction details
 
 ## 🔧 Development
 
@@ -214,11 +211,9 @@ This demo demonstrates:
 ```
 UniversalAssetNegotiation/
 ├── agents/                          # Individual agent implementations
-│   ├── travel-agent/               # Travel coordination agent
-│   ├── hotel-agent/                # Hotel booking agent
-│   ├── flight-agent/               # Flight management agent
-│   ├── payment-agent/              # Payment processing agent
-│   └── asset-broker-agent/         # Asset negotiation coordinator
+│   ├── payment-agent/              # Carbon credit payment processing agent
+│   ├── asset-broker-agent/         # Asset negotiation coordinator
+│   └── carbon-credit-negotiation-agent/  # Carbon credit price negotiation agent
 ├── web-ui/                         # Next.js web interface
 │   ├── src/
 │   │   ├── components/             # React components

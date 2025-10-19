@@ -5,18 +5,16 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "agents:asset-broker": "npx tsx agents/asset-broker-agent/src/index.ts",
-    "agents:travel-agent": "npx tsx agents/travel-agent/src/index.ts",
-    "agents:hotel-agent": "npx tsx agents/hotel-agent/src/index.ts",
     "agents:payment-agent": "npx tsx agents/payment-agent/src/index.ts",
-    "agents:flight-agent": "npx tsx agents/flight-agent/src/index.ts",
-    "agents:all": "concurrently \"npm run agents:asset-broker\" \"npm run agents:travel-agent\" \"npm run agents:hotel-agent\" \"npm run agents:payment-agent\" \"npm run agents:flight-agent\"",
+    "agents:carbon-credit-negotiation": "npx tsx agents/carbon-credit-negotiation-agent/src/index.ts",
+    "agents:all": "concurrently \"npm run agents:payment-agent\" \"npm run agents:carbon-credit-negotiation\"",
     "ui:dev": "cd web-ui && npm run dev",
     "ui:build": "cd web-ui && npm run build",
     "ui:start": "cd web-ui && npm run start",
-    "demo:negotiation": "npx tsx demo/negotiation-demo.ts",
-    "demo:travel": "npx tsx demo/travel-demo.ts",
-    "setup": "npm install && cd web-ui && npm install && cd ../agents/asset-broker-agent && npm install"
+    "demo:multi-agent": "npx tsx demo/multi-agent-demo.ts",
+    "demo:carbon-credit": "npx tsx demo/carbon-credit-demo.ts",
+    "demo:carbon-credit-payment": "npx tsx demo/carbon-credit-payment-demo.ts",
+    "setup": "npm install && cd web-ui && npm install && cd ../agents/payment-agent && npm install && cd ../carbon-credit-negotiation-agent && npm install"
   },
   "keywords": [
     "a2a",
@@ -45,6 +43,7 @@
     "express": "^4.21.2",
     "hedera-agent-kit": "^3.4.0",
     "langchain": "^1.0.1",
+    "node-fetch": "^3.3.2",
     "uuid": "^11.0.3"
   }
 }
