@@ -13,13 +13,20 @@
     "@hashgraph/sdk": "^2.75.0",
     "@langchain/core": "^1.0.1",
     "@langchain/groq": "^1.0.0",
+    "@reown/appkit": "^1.8.10",
+    "@reown/appkit-adapter-wagmi": "^1.8.10",
+    "@reown/appkit-wallet-button": "^1.8.10",
+    "@tanstack/react-query": "^5.90.3",
     "dotenv": "^17.2.3",
+    "ethers": "^6.13.4",
     "hedera-agent-kit": "^3.4.0",
     "langchain": "^1.0.1",
     "lucide-react": "^0.546.0",
     "next": "15.5.6",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "viem": "^2.38.2",
+    "wagmi": "^2.18.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -1,9 +1,10 @@
 # Universal Asset Negotiation Web UI
 
-This is a Next.js application for the Universal Asset Negotiation platform, featuring Hedera blockchain integration and AI-powered chat assistance.
+This is a Next.js application for the Universal Asset Negotiation platform, featuring Hedera blockchain integration, wallet connection, and AI-powered chat assistance.
 
 ## Features
 
+- **Wallet Connection**: Connect your wallet using Reown AppKit (WalletConnect)
 - **Asset Negotiation Interface**: Multi-agent A2A protocol platform
 - **Hedera AI Assistant**: Blockchain operations and queries powered by AI
 - **Real-time Chat**: Interactive chat interface for Hedera operations
@@ -16,6 +17,7 @@ This is a Next.js application for the Universal Asset Negotiation platform, feat
 - npm or yarn
 - Hedera account credentials
 - Groq API key (for AI functionality)
+- Reown project ID (for wallet connection)
 
 ### Environment Setup
 
@@ -28,7 +30,15 @@ HEDERA_PRIVATE_KEY=your_private_key_here
 
 # AI Provider Configuration
 GROQ_API_KEY=your_groq_api_key_here
+
+# Wallet Connection (Reown AppKit)
+NEXT_PUBLIC_PROJECT_ID=your_reown_project_id_here
 ```
+
+**Getting your Reown Project ID:**
+1. Visit [https://dashboard.reown.com](https://dashboard.reown.com)
+2. Create a new project or use an existing one
+3. Copy your project ID and add it to your `.env.local` file
 
 ### Installation
 

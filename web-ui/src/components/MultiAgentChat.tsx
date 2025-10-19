@@ -43,6 +43,7 @@ export default function MultiAgentChat() {
   const [negotiationSteps, setNegotiationSteps] = useState<NegotiationStep[]>([]);
   const [isNegotiating, setIsNegotiating] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
 
   useEffect(() => {
     initializeAgents();
@@ -53,6 +54,7 @@ export default function MultiAgentChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, hederaMessages, negotiationSteps]);
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,7 +77,7 @@ export default function MultiAgentChat() {
       id: 'welcome',
       role: 'agent',
       agentName: 'System',
-      content: '🌱 Welcome to the Carbon Credit Trading Platform!\n\nI can help you trade carbon credits with specialized agents:\n\n🌱 **Carbon Credit Negotiation Agent** - Find best carbon credit offers from marketplace\n💳 **Carbon Credit Payment Agent** - Process payments with USDC/USDT/HBAR\n\nTry asking: "Find 10,000 carbon credits at best price" or "Process payment for 5,000 carbon credits using USDC"',
+      content: `🌱 Welcome to the Universal Asset Negotiation Platform!\n\nI can help you trade carbon credits with specialized agents:\n\n🌱 **Carbon Credit Negotiation Agent** - Find best carbon credit offers from marketplace\n💳 **Carbon Credit Payment Agent** - Process payments with USDC/USDT/HBAR\n\nTry asking: "Find 10,000 carbon credits at best price" or "Process payment for 5,000 carbon credits using USDC"`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -351,6 +353,7 @@ export default function MultiAgentChat() {
             </div>
           </div>
         </div>
+
 
         {/* Agent List */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2">

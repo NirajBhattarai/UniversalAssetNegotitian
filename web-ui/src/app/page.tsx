@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import MultiAgentChat from '@/components/MultiAgentChat'
+import { WalletConnectButton, WalletStatus } from '@/components/WalletConnect'
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
@@ -104,6 +105,7 @@ export default function Home() {
                   <span className="hidden sm:inline">🟢 All Systems Online</span>
                   <span className="sm:hidden">🟢</span>
                 </div>
+                <WalletConnectButton />
               </div>
             </div>
           </div>
@@ -136,6 +138,12 @@ export default function Home() {
               </div>
               
               <div className="p-4 space-y-3">
+                {/* Wallet Connect */}
+                <WalletConnectButton />
+                
+                {/* Wallet Status */}
+                <WalletStatus />
+                
                 {/* Carbon Credit Negotiation Agent */}
                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-green-50 border border-green-200">
                   <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">

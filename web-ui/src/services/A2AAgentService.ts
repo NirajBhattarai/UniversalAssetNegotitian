@@ -34,9 +34,9 @@ export class A2AAgentService {
   ];
 
   constructor() {
-    // Initialize clients asynchronously
+    // Initialize clients asynchronously - don't fail if agents are offline
     this.initializeClients().catch(error => {
-      console.warn('Failed to initialize some A2A clients:', error);
+      console.warn('Some A2A agents are offline - this is expected if agents are not running:', error);
     });
   }
 
@@ -46,8 +46,9 @@ export class A2AAgentService {
         try {
           const client = await A2AClient.fromCardUrl(`${agent.url}/.well-known/agent-card.json`);
           this.clients.set(agent.id, client);
+          console.log(`✅ Successfully connected to ${agent.name}`);
         } catch (error) {
-          console.warn(`Failed to initialize client for ${agent.name}:`, error);
+          console.warn(`⚠️  ${agent.name} is offline (this is normal if agents are not running):`, error instanceof Error ? error.message : 'Connection failed');
         }
       })
     );
@@ -61,12 +62,12 @@ export class A2AAgentService {
       const response = await fetch(`${agent.url}/.well-known/agent-card.json`, {
         method: 'GET',
         mode: 'cors',
-        signal: AbortSignal.timeout(5000) // Increased timeout
+        signal: AbortSignal.timeout(3000) // Reduced timeout for faster response
       });
       
       return response.ok;
     } catch (error) {
-      console.warn(`Agent ${agentId} status check failed:`, error);
+      // Don't log warnings for offline agents - this is expected behavior
       return false;
     }
   }
