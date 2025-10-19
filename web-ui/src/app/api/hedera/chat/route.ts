@@ -29,7 +29,7 @@ class MockHederaServerClient {
       return {
         message: 'Mock Hedera client not initialized.',
         success: false,
-        error: 'Client not initialized'
+        error: 'Client not initialized',
       };
     }
 
@@ -38,39 +38,39 @@ class MockHederaServerClient {
 
     // Mock responses based on input
     const lowerInput = input.toLowerCase();
-    
+
     if (lowerInput.includes('balance') || lowerInput.includes('hbar')) {
       return {
         message: `💰 Your mock HBAR balance: 1,250.50 HBAR\n\n📊 Account Details:\n• Account ID: 0.0.123456\n• Network: Mock Testnet\n• Status: Active\n• Last Transaction: Mock transaction ID\n\n💡 This is mock data for testing purposes.`,
-        success: true
+        success: true,
       };
     }
-    
+
     if (lowerInput.includes('account') || lowerInput.includes('info')) {
       return {
         message: `🔍 Mock Account Information:\n\n• Account ID: 0.0.123456\n• Public Key: Mock public key\n• Network: Mock Testnet\n• Balance: 1,250.50 HBAR\n• Created: Mock timestamp\n• Status: Active\n\n💡 This is mock data for testing purposes.`,
-        success: true
+        success: true,
       };
     }
-    
+
     if (lowerInput.includes('transaction') || lowerInput.includes('send')) {
       return {
         message: `📤 Mock Transaction Details:\n\n• Transaction ID: Mock transaction ID\n• Amount: Mock amount\n• Recipient: Mock recipient\n• Status: Confirmed\n• Gas Used: Mock gas amount\n• Timestamp: Mock timestamp\n\n✅ Transaction completed successfully!\n\n💡 This is mock data for testing purposes.`,
-        success: true
+        success: true,
       };
     }
-    
+
     if (lowerInput.includes('help') || lowerInput.includes('what can you do')) {
       return {
         message: `🤖 Mock Hedera Assistant - Available Commands:\n\n• "What's my HBAR balance?" - Check account balance\n• "Show my account information" - Display account details\n• "Send transaction" - Process mock transaction\n• "Help" - Show this help message\n\n💡 This is a mock implementation for testing purposes.`,
-        success: true
+        success: true,
       };
     }
 
     // Default response
     return {
       message: `🤖 Mock Hedera Assistant Response:\n\nI received your message: "${input}"\n\nThis is a mock implementation for testing purposes. In a real implementation, I would:\n\n• Connect to Hedera network\n• Execute blockchain operations\n• Provide real-time data\n• Process actual transactions\n\nTry asking about your balance or account information!`,
-      success: true
+      success: true,
     };
   }
 
@@ -93,7 +93,7 @@ let hederaClient: MockHederaServerClient | null = null;
 export async function POST(request: NextRequest) {
   try {
     const body: HederaChatRequest = await request.json();
-    
+
     if (!body.message) {
       return NextResponse.json(
         { message: 'Message is required', success: false },
@@ -107,7 +107,10 @@ export async function POST(request: NextRequest) {
       const initialized = await hederaClient.initialize();
       if (!initialized) {
         return NextResponse.json(
-          { message: 'Failed to initialize mock Hedera client', success: false },
+          {
+            message: 'Failed to initialize mock Hedera client',
+            success: false,
+          },
           { status: 500 }
         );
       }
@@ -118,7 +121,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
-      { message: 'Internal server error', success: false, error: 'Server error' },
+      {
+        message: 'Internal server error',
+        success: false,
+        error: 'Server error',
+      },
       { status: 500 }
     );
   }

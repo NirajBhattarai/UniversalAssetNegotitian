@@ -1,6 +1,12 @@
 'use client';
 
-import { wagmiAdapter, wagmiConfig, projectId, networks, defaultNetwork } from '@/config/reown-config';
+import {
+  wagmiAdapter,
+  wagmiConfig,
+  projectId,
+  networks,
+  defaultNetwork,
+} from '@/config/reown-config';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createAppKit } from '@reown/appkit/react';
 import React, { type ReactNode } from 'react';

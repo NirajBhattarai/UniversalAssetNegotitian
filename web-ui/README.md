@@ -13,7 +13,7 @@ This is a Next.js application for the Universal Asset Negotiation platform, feat
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - Hedera account credentials
 - Groq API key (for AI functionality)
@@ -36,6 +36,7 @@ NEXT_PUBLIC_PROJECT_ID=your_reown_project_id_here
 ```
 
 **Getting your Reown Project ID:**
+
 1. Visit [https://dashboard.reown.com](https://dashboard.reown.com)
 2. Create a new project or use an existing one
 3. Copy your project ID and add it to your `.env.local` file
@@ -43,11 +44,13 @@ NEXT_PUBLIC_PROJECT_ID=your_reown_project_id_here
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Run the development server:
+
 ```bash
 npm run dev
 ```

@@ -42,7 +42,7 @@ export class HederaClientService {
       return {
         message: 'Failed to send message. Please try again.',
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

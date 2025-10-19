@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       'pino',
       'pino-pretty',
       'sonic-boom',
-      'pino-abstract-transport'
+      'pino-abstract-transport',
     ],
   },
   webpack: (config, { isServer }) => {

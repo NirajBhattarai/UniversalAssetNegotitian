@@ -6,13 +6,15 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@a2a-js/sdk": "^0.3.4",
     "@hashgraph/sdk": "^2.75.0",
     "@langchain/core": "^1.0.1",
     "@langchain/groq": "^1.0.0",
+    "@langchain/openai": "^1.0.0",
     "@reown/appkit": "^1.8.10",
     "@reown/appkit-adapter-wagmi": "^1.8.10",
     "@reown/appkit-wallet-button": "^1.8.10",
@@ -36,6 +38,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.6",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

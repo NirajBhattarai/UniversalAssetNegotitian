@@ -47,7 +47,7 @@ export class WalletBalanceService {
       return {
         success: false,
         balances: [],
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -55,7 +55,10 @@ export class WalletBalanceService {
   /**
    * Get balance for a specific token
    */
-  async getTokenBalance(tokenId: string, walletAddress?: string): Promise<TokenBalance | null> {
+  async getTokenBalance(
+    tokenId: string,
+    walletAddress?: string
+  ): Promise<TokenBalance | null> {
     try {
       const response = await fetch(`${this.baseUrl}/balance/${tokenId}`, {
         method: 'POST',
@@ -83,25 +86,25 @@ export class WalletBalanceService {
   formatBalance(balance: string, decimals: number): string {
     const numBalance = parseFloat(balance);
     if (isNaN(numBalance)) return '0';
-    
+
     // Convert from smallest unit to main unit
     const formattedBalance = numBalance / Math.pow(10, decimals);
-    
+
     // Format with appropriate decimal places
     if (formattedBalance >= 1000) {
-      return formattedBalance.toLocaleString('en-US', { 
-        minimumFractionDigits: 2, 
-        maximumFractionDigits: 2 
+      return formattedBalance.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
       });
     } else if (formattedBalance >= 1) {
-      return formattedBalance.toLocaleString('en-US', { 
-        minimumFractionDigits: 2, 
-        maximumFractionDigits: 6 
+      return formattedBalance.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 6,
       });
     } else {
-      return formattedBalance.toLocaleString('en-US', { 
-        minimumFractionDigits: 0, 
-        maximumFractionDigits: 8 
+      return formattedBalance.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 8,
       });
     }
   }

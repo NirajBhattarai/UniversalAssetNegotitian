@@ -41,7 +41,10 @@ class MockWalletBalanceService {
 
       for (const [tokenId, tokenConfig] of Object.entries(TOKEN_CONFIGS)) {
         const rawBalance = this.mockBalances[tokenId] || '0';
-        const formattedBalance = this.formatBalance(rawBalance, tokenConfig.decimals);
+        const formattedBalance = this.formatBalance(
+          rawBalance,
+          tokenConfig.decimals
+        );
 
         balances.push({
           tokenId: tokenConfig.id,
@@ -50,21 +53,22 @@ class MockWalletBalanceService {
           balance: rawBalance,
           decimals: tokenConfig.decimals,
           address: tokenConfig.address,
-          formattedBalance
+          formattedBalance,
         });
       }
 
       return {
         success: true,
         balances,
-        walletAddress: walletAddress || '0x1234567890123456789012345678901234567890'
+        walletAddress:
+          walletAddress || '0x1234567890123456789012345678901234567890',
       };
     } catch (error) {
       console.error('Error fetching wallet balances:', error);
       return {
         success: false,
         balances: [],
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -72,21 +76,29 @@ class MockWalletBalanceService {
   /**
    * Get balance for a specific token
    */
-  async getTokenBalance(tokenId: string, walletAddress?: string): Promise<{ success: boolean; balance?: TokenBalance; error?: string }> {
+  async getTokenBalance(
+    tokenId: string,
+    walletAddress?: string
+  ): Promise<{ success: boolean; balance?: TokenBalance; error?: string }> {
     try {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const tokenConfig = Object.values(TOKEN_CONFIGS).find(token => token.id === tokenId);
+      const tokenConfig = Object.values(TOKEN_CONFIGS).find(
+        token => token.id === tokenId
+      );
       if (!tokenConfig) {
         return {
           success: false,
-          error: `Token ${tokenId} not found`
+          error: `Token ${tokenId} not found`,
         };
       }
 
       const rawBalance = this.mockBalances[tokenConfig.symbol] || '0';
-      const formattedBalance = this.formatBalance(rawBalance, tokenConfig.decimals);
+      const formattedBalance = this.formatBalance(
+        rawBalance,
+        tokenConfig.decimals
+      );
 
       const balance: TokenBalance = {
         tokenId: tokenConfig.id,
@@ -95,18 +107,18 @@ class MockWalletBalanceService {
         balance: rawBalance,
         decimals: tokenConfig.decimals,
         address: tokenConfig.address,
-        formattedBalance
+        formattedBalance,
       };
 
       return {
         success: true,
-        balance
+        balance,
       };
     } catch (error) {
       console.error(`Error fetching ${tokenId} balance:`, error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -117,25 +129,25 @@ class MockWalletBalanceService {
   private formatBalance(balance: string, decimals: number): string {
     const numBalance = parseFloat(balance);
     if (isNaN(numBalance)) return '0';
-    
+
     // Convert from smallest unit to main unit
     const formattedBalance = numBalance / Math.pow(10, decimals);
-    
+
     // Format with appropriate decimal places
     if (formattedBalance >= 1000) {
-      return formattedBalance.toLocaleString('en-US', { 
-        minimumFractionDigits: 2, 
-        maximumFractionDigits: 2 
+      return formattedBalance.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
       });
     } else if (formattedBalance >= 1) {
-      return formattedBalance.toLocaleString('en-US', { 
-        minimumFractionDigits: 2, 
-        maximumFractionDigits: 6 
+      return formattedBalance.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 6,
       });
     } else {
-      return formattedBalance.toLocaleString('en-US', { 
-        minimumFractionDigits: 0, 
-        maximumFractionDigits: 8 
+      return formattedBalance.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 8,
       });
     }
   }
@@ -158,10 +170,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        balances: [], 
-        error: 'Internal server error' 
+      {
+        success: false,
+        balances: [],
+        error: 'Internal server error',
       },
       { status: 500 }
     );
@@ -180,10 +192,10 @@ export async function GET() {
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        balances: [], 
-        error: 'Internal server error' 
+      {
+        success: false,
+        balances: [],
+        error: 'Internal server error',
       },
       { status: 500 }
     );
