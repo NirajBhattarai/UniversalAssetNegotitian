@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { HederaClientService, HederaMessage } from '@/services/HederaClient';
+import { WalletBalanceService } from '@/services/WalletBalanceService';
+import { useAccount } from 'wagmi';
 
 interface HederaChatProps {
   className?: string;
@@ -16,9 +18,11 @@ export default function HederaChat({ className = '' }: HederaChatProps) {
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hederaClient = useRef<HederaClientService | null>(null);
+  const walletBalanceService = useRef<WalletBalanceService | null>(null);
+  const { address, isConnected: isWalletConnected } = useAccount();
 
   useEffect(() => {
-    initializeHederaClient();
+    initializeServices();
   }, []);
 
   useEffect(() => {
@@ -29,26 +33,45 @@ export default function HederaChat({ className = '' }: HederaChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const initializeHederaClient = async () => {
+  useEffect(() => {
+    initializeServices();
+  }, []);
+
+  const initializeServices = async () => {
     try {
       setConnectionStatus('connecting');
-      hederaClient.current = new HederaClientService();
-      const connected = await hederaClient.current.checkConnection();
       
-      if (connected) {
+      // Initialize Hedera client
+      hederaClient.current = new HederaClientService();
+      const hederaConnected = await hederaClient.current.checkConnection();
+      
+      // Initialize wallet balance service
+      walletBalanceService.current = new WalletBalanceService();
+      
+      if (hederaConnected) {
         setIsConnected(true);
         setConnectionStatus('connected');
-        addMessage('assistant', '🔗 Connected to Hedera network! I can help you check your HBAR balance, query account information, and perform basic Hedera operations. How can I assist you?');
+        
+        let welcomeMessage = '🔗 Connected to Hedera network! I can help you check your wallet balances, query account information, and perform basic Hedera operations.';
+        
+        if (isWalletConnected && address) {
+          welcomeMessage += `\n\n💰 Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
+          welcomeMessage += '\n\nTry asking: "Check my balance" or "What tokens do I have?"';
+        } else {
+          welcomeMessage += '\n\n💡 Connect your wallet to check balances and perform transactions.';
+        }
+        
+        addMessage('assistant', welcomeMessage);
       } else {
         setIsConnected(false);
         setConnectionStatus('error');
         addMessage('assistant', '❌ Failed to connect to Hedera network. Please check your configuration and try again.');
       }
     } catch (error) {
-      console.error('Failed to initialize Hedera client:', error);
+      console.error('Failed to initialize services:', error);
       setIsConnected(false);
       setConnectionStatus('error');
-      addMessage('assistant', '❌ Error initializing Hedera client. Please check your environment variables.');
+      addMessage('assistant', '❌ Error initializing services. Please check your environment variables.');
     }
   };
 
@@ -73,18 +96,62 @@ export default function HederaChat({ className = '' }: HederaChatProps) {
     addMessage('user', userMessage);
 
     try {
-      const response = await hederaClient.current.sendMessage(userMessage);
-      
-      if (response.success) {
-        addMessage('assistant', response.message);
+      // Check if user is asking for balance
+      const lowerMessage = userMessage.toLowerCase();
+      if ((lowerMessage.includes('balance') || lowerMessage.includes('check my') || lowerMessage.includes('what tokens')) && walletBalanceService.current) {
+        await handleBalanceCheck();
       } else {
-        addMessage('assistant', `❌ Error: ${response.message}`);
+        // Use regular Hedera client for other operations
+        const response = await hederaClient.current.sendMessage(userMessage);
+        
+        if (response.success) {
+          addMessage('assistant', response.message);
+        } else {
+          addMessage('assistant', `❌ Error: ${response.message}`);
+        }
       }
     } catch (error) {
       console.error('Error sending message:', error);
       addMessage('assistant', '❌ An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleBalanceCheck = async () => {
+    if (!walletBalanceService.current) {
+      addMessage('assistant', '❌ Wallet balance service not available.');
+      return;
+    }
+
+    if (!isWalletConnected || !address) {
+      addMessage('assistant', '❌ Please connect your wallet first to check balances.');
+      return;
+    }
+
+    try {
+      addMessage('assistant', '🔍 Checking your wallet balances...');
+      
+      const response = await walletBalanceService.current.getBalances(address);
+      
+      if (response.success && response.balances.length > 0) {
+        let balanceMessage = `💰 **Wallet Balances**\n\n`;
+        balanceMessage += `📍 Wallet: ${address.slice(0, 6)}...${address.slice(-4)}\n\n`;
+        
+        response.balances.forEach((balance: any) => {
+          balanceMessage += `**${balance.symbol}** (${balance.name})\n`;
+          balanceMessage += `• Balance: ${balance.formattedBalance} ${balance.symbol}\n`;
+          balanceMessage += `• Address: ${balance.address}\n\n`;
+        });
+        
+        balanceMessage += `💡 These are mock balances for testing purposes.`;
+        addMessage('assistant', balanceMessage);
+      } else {
+        addMessage('assistant', `❌ Failed to fetch balances: ${response.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error checking balances:', error);
+      addMessage('assistant', '❌ Failed to check balances. Please try again.');
     }
   };
 

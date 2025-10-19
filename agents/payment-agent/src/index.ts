@@ -26,6 +26,7 @@ import {
   DefaultRequestHandler,
 } from "@a2a-js/sdk/server";
 import { A2AExpressApp } from "@a2a-js/sdk/server/express";
+import { PAYMENT_METHODS, TOKEN_CONFIGS, getPaymentMethodById, getTokenById } from './constants/tokens.js';
 
 // Mock data for testing (Hedera integration removed for now)
 
@@ -66,6 +67,8 @@ interface CarbonCreditPaymentRequest {
   companyName: string;
   pricePerCredit: number;
   paymentMethod: 'usdc' | 'usdt' | 'hbar';
+  tokenAddress?: string;
+  tokenDecimals?: number;
 }
 
 interface PaymentResult {
@@ -85,13 +88,8 @@ interface PaymentResult {
   };
 }
 
-// Simple store for contexts and payment methods
+// Simple store for contexts
 const contexts: Map<string, Message[]> = new Map();
-const paymentMethods = [
-  { id: 'hbar', name: 'Hedera Token (HBAR)', rate: 0.05, minAmount: 10, blockchain: 'Hedera' },
-  { id: 'usdc', name: 'USD Coin (USDC)', rate: 1.0, minAmount: 1, blockchain: 'Ethereum/Polygon' },
-  { id: 'usdt', name: 'Tether (USDT)', rate: 1.0, minAmount: 1, blockchain: 'Ethereum/Tron' }
-];
 
 /**
  * PaymentAgentExecutor implements the payment agent's core logic for processing carbon credit payments
@@ -212,6 +210,10 @@ class PaymentAgentExecutor implements AgentExecutor {
     // Parse carbon credit payment request
     const paymentRequest = this.parseCarbonCreditPaymentRequest(userText);
     const selectedMethod = this.selectPaymentMethod(userText);
+    
+    // Add token address and decimals to payment request
+    paymentRequest.tokenAddress = selectedMethod.tokenAddress;
+    paymentRequest.tokenDecimals = selectedMethod.decimals;
 
     // Payment processing steps
     const steps = [
@@ -232,8 +234,14 @@ class PaymentAgentExecutor implements AgentExecutor {
       },
       {
         delay: 1500,
-        message: "⛓️ Executing blockchain transaction...",
-        data: { step: "blockchain", network: selectedMethod.blockchain, status: "processing" }
+        message: `⛓️ Executing blockchain transaction using ${selectedMethod.name} (${selectedMethod.tokenAddress})...`,
+        data: { 
+          step: "blockchain", 
+          network: selectedMethod.blockchain, 
+          status: "processing",
+          tokenAddress: selectedMethod.tokenAddress,
+          tokenDecimals: selectedMethod.decimals
+        }
       },
       {
         delay: 1000,
@@ -242,8 +250,14 @@ class PaymentAgentExecutor implements AgentExecutor {
       },
       {
         delay: 800,
-        message: "✅ Carbon credit payment settled successfully!",
-        data: { step: "settlement", status: "completed" }
+        message: `✅ Carbon credit payment settled successfully using ${selectedMethod.name}!`,
+        data: { 
+          step: "settlement", 
+          status: "completed",
+          tokenAddress: selectedMethod.tokenAddress,
+          tokenDecimals: selectedMethod.decimals,
+          paymentMethod: selectedMethod.id
+        }
       }
     ];
 
@@ -443,14 +457,14 @@ class PaymentAgentExecutor implements AgentExecutor {
     const lowerText = text.toLowerCase();
     
     if (lowerText.includes('hbar') || lowerText.includes('hedera')) {
-      return paymentMethods[0];
+      return getPaymentMethodById('hbar');
     } else if (lowerText.includes('usdc')) {
-      return paymentMethods[1];
+      return getPaymentMethodById('usdc');
     } else if (lowerText.includes('usdt')) {
-      return paymentMethods[2];
+      return getPaymentMethodById('usdt');
     }
     
-    return paymentMethods[1]; // Default to USDC for carbon credits
+    return getPaymentMethodById('usdc'); // Default to USDC for carbon credits
   }
 }
 
@@ -458,7 +472,7 @@ class PaymentAgentExecutor implements AgentExecutor {
 
 const paymentAgentCard: AgentCard = {
   name: 'Carbon Credit Payment Agent',
-  description: 'An AI payment agent that processes carbon credit payments with database integration and dummy blockchain settlement (TODO: implement real blockchain).',
+  description: `An AI payment agent that processes carbon credit payments with database integration and dummy blockchain settlement. Supports HBAR, MockUSDC (${TOKEN_CONFIGS.MOCK_USDC.address}), and MockUSDT (${TOKEN_CONFIGS.MOCK_USDT.address}) tokens on Hedera network.`,
   url: 'http://localhost:41245/',
   provider: {
     organization: 'Universal Asset Negotiation',
@@ -479,12 +493,12 @@ const paymentAgentCard: AgentCard = {
     {
       id: 'carbon_credit_payment',
       name: 'Carbon Credit Payment Processing',
-      description: 'Processes carbon credit payments with database integration and dummy blockchain settlement (TODO: implement real blockchain).',
+      description: `Processes carbon credit payments with database integration and dummy blockchain settlement. Supports HBAR, MockUSDC (${TOKEN_CONFIGS.MOCK_USDC.address}), and MockUSDT (${TOKEN_CONFIGS.MOCK_USDT.address}) tokens on Hedera network.`,
       tags: ['carbon-credit', 'payment', 'database', 'blockchain', 'a2a'],
       examples: [
-        'Pay for 1000 carbon credits from company 1 for $15000 using USDC',
+        'Pay for 1000 carbon credits from company 1 for $15000 using MockUSDC',
         'Process carbon credit payment of 500 credits using HBAR tokens',
-        'Settle carbon credit purchase with USDT for 2000 credits',
+        'Settle carbon credit purchase with MockUSDT for 2000 credits',
         'Complete payment for 10000 carbon credits using Hedera tokens'
       ],
       inputModes: ['text'],

@@ -30,6 +30,12 @@ export class A2AAgentService {
       name: 'Carbon Credit Payment Agent',
       url: 'http://localhost:41245',
       description: 'Process carbon credit payments with blockchain'
+    },
+    {
+      id: 'wallet-balance',
+      name: 'Multi-Network Wallet Balance Agent',
+      url: 'http://localhost:41252',
+      description: 'Check wallet balances across Hedera, Ethereum, and Polygon networks'
     }
   ];
 

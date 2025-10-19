@@ -73,6 +73,15 @@ Each agent follows a standardized architecture:
   - Transaction verification and confirmation
   - Future blockchain integration (TODO)
 
+### Multi-Network Wallet Balance Agent (Port 41252)
+- **Purpose**: Fetches wallet balances across multiple blockchain networks
+- **Capabilities**:
+  - Multi-network support (Hedera, Ethereum, Polygon)
+  - Native currency balance checking (HBAR, ETH, MATIC)
+  - ERC20 token balance support (USDC, USDT, WETH, WMATIC)
+  - Real-time balance queries with USD value conversion
+  - REST API for programmatic access
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -101,6 +110,7 @@ Each agent follows a standardized architecture:
    cd agents/payment-agent && npm install && cd ../..
    cd agents/asset-broker-agent && npm install && cd ../..
    cd agents/carbon-credit-negotiation-agent && npm install && cd ../..
+   cd agents/wallet-balance-agent && npm install && cd ../..
    ```
 
 3. **Environment Setup**
@@ -135,9 +145,12 @@ npm run agents:payment-agent
 
 # Terminal 3: Asset Broker Agent
 npm run agents:asset-broker
+
+# Terminal 4: Wallet Balance Agent
+npm run agents:wallet-balance
 ```
 
-# Terminal 6: Web UI
+# Terminal 5: Web UI
 npm run ui:dev
 ```
 
@@ -146,11 +159,10 @@ npm run ui:dev
 Once started, you can access:
 
 - **Web UI**: http://localhost:3000
-- **Travel Agent**: http://localhost:41243/.well-known/agent-card.json
-- **Hotel Agent**: http://localhost:41244/.well-known/agent-card.json
-- **Flight Agent**: http://localhost:41246/.well-known/agent-card.json
-- **Payment Agent**: http://localhost:41245/.well-known/agent-card.json
+- **Carbon Credit Negotiation Agent**: http://localhost:41251/.well-known/agent-card.json
+- **Carbon Credit Payment Agent**: http://localhost:41245/.well-known/agent-card.json
 - **Asset Broker Agent**: http://localhost:41250/.well-known/agent-card.json
+- **Multi-Network Wallet Balance Agent**: http://localhost:41252/.well-known/agent-card.json
 
 ## 🎮 Demo Scenarios
 
@@ -204,6 +216,19 @@ This demo showcases:
 - Dummy blockchain settlement (TODO: implement real blockchain)
 - Payment confirmation and transaction details
 
+### Multi-Network Wallet Balance Demo
+
+```bash
+npm run demo:wallet-balance
+```
+
+This demo showcases:
+- Multi-network wallet balance checking (Hedera, Ethereum, Polygon)
+- Native currency balance fetching (HBAR, ETH, MATIC)
+- ERC20 token balance support (USDC, USDT, WETH, WMATIC)
+- Real-time balance queries with USD value conversion
+- REST API access for programmatic balance checking
+
 ## 🔧 Development
 
 ### Project Structure
@@ -213,7 +238,8 @@ UniversalAssetNegotiation/
 ├── agents/                          # Individual agent implementations
 │   ├── payment-agent/              # Carbon credit payment processing agent
 │   ├── asset-broker-agent/         # Asset negotiation coordinator
-│   └── carbon-credit-negotiation-agent/  # Carbon credit price negotiation agent
+│   ├── carbon-credit-negotiation-agent/  # Carbon credit price negotiation agent
+│   └── wallet-balance-agent/       # Multi-network wallet balance checking agent
 ├── web-ui/                         # Next.js web interface
 │   ├── src/
 │   │   ├── components/             # React components
