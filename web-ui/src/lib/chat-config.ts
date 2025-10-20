@@ -1,6 +1,7 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { AgentExecutor, createToolCallingAgent } from 'langchain/agents';
 import {
+  AgentMode,
   coreAccountQueryPlugin,
   coreConsensusQueryPlugin,
   coreTokenQueryPlugin,
@@ -111,6 +112,19 @@ export function createHederaToolkit(client: Client) {
         coreTokenQueryPlugin,
         coreConsensusQueryPlugin,
       ],
+      context:{
+        /**
+         * This tool has two execution modes with AI agents:
+         * 
+         * 1. AgentMode.RETURN_BYTE: The transaction will be executed and the bytes 
+         *    to execute the Hedera transaction will be returned.
+         * 
+         * 2. AgentMode.AUTONOMOUS: The transaction will be executed autonomously, 
+         *    using the accountID set (the operator account can be set in the client 
+         *    with .setOperator(process.env.ACCOUNT_ID!))
+         */
+        mode: AgentMode.AUTONOMOUS,
+      }
     },
   });
 }

@@ -8,6 +8,7 @@ import {
   setupTools,
   createAgentExecutor,
   createFallbackResponse,
+  createSystemPrompt,
 } from '../../lib/chat-config';
 import {
   streamChunk,
@@ -15,6 +16,8 @@ import {
   streamEnd,
   processStreamChunks,
 } from '../../lib/chat-streaming';
+import { AgentExecutor, createToolCallingAgent } from 'langchain/agents';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 /**
  * API endpoint for Hedera AI Chat with streaming
@@ -40,6 +43,8 @@ export default async function handler(
       });
     }
 
+    console.log('Prompt received:', inputPrompt);
+
     // Check if any AI provider is available
     let llm;
     try {
@@ -50,59 +55,28 @@ export default async function handler(
       });
     }
 
+      // Load the structured chat prompt template
+  const prompt = ChatPromptTemplate.fromMessages([
+    ['system', createSystemPrompt(inputPrompt)],
+    ['placeholder', '{chat_history}'],
+    ['human', '{input}'],
+    ['placeholder', '{agent_scratchpad}'],
+  ]);
+
     // Setup Hedera tools and agent
     const { tools } = setupTools();
-    const agentExecutor = createAgentExecutor(llm, tools);
 
-    // Set up Server-Sent Events streaming response
-    Object.entries(SSE_HEADERS).forEach(([key, value]) => {
-      res.setHeader(key, value);
+    const agent = createToolCallingAgent({
+      llm,
+      tools,
+      prompt
     });
 
-    console.log('Starting chat stream for prompt:', inputPrompt);
-
-    // Check if this is a wallet balance request and handle it directly
-    const lowerPrompt = inputPrompt.toLowerCase();
-    const walletAddressMatch = inputPrompt.match(
-      /(0x[a-fA-F0-9]{40}|0\.0\.\d+)/
-    );
-
-    if (
-      (lowerPrompt.includes('balance') || lowerPrompt.includes('wallet')) &&
-      walletAddressMatch
-    ) {
-      console.log('Detected wallet balance request, handling directly');
-
-      try {
-        const { createWalletBalanceTool } = await import(
-          '../../lib/wallet-balance-tool'
-        );
-        const walletTool = createWalletBalanceTool();
-
-        // Extract network if specified
-        let network = 'all';
-        if (lowerPrompt.includes('ethereum')) network = 'ethereum';
-        else if (lowerPrompt.includes('polygon')) network = 'polygon';
-        else if (lowerPrompt.includes('bsc')) network = 'bsc';
-        else if (lowerPrompt.includes('arbitrum')) network = 'arbitrum';
-        else if (lowerPrompt.includes('optimism')) network = 'optimism';
-        else if (lowerPrompt.includes('avalanche')) network = 'avalanche';
-        else if (lowerPrompt.includes('hedera')) network = 'hedera';
-
-        const result = await walletTool.invoke({
-          walletAddress: walletAddressMatch[0],
-          network: network,
-        });
-
-        // Stream the result
-        await streamChunk(res, result, 0);
-        streamEnd(res, result);
-        return;
-      } catch (error) {
-        console.error('Direct wallet balance handling failed:', error);
-        // Fall through to agent executor
-      }
-    }
+    const agentExecutor = new AgentExecutor({
+      agent,
+      tools,
+    });
+      
 
     try {
       // Stream from agent executor with timeout

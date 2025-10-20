@@ -13,6 +13,7 @@ import {
   Bot,
   Shield,
 } from 'lucide-react';
+import { WalletConnectButton } from '@/components/WalletConnect';
 
 interface HederaMessage {
   id: string;
@@ -497,6 +498,7 @@ export default function ChatPage() {
                 <span className='hidden sm:inline'>🟢 All Systems Online</span>
                 <span className='sm:hidden'>🟢</span>
               </div>
+              <WalletConnectButton />
             </div>
           </div>
         </div>
