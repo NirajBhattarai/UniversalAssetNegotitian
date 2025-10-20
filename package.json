@@ -8,7 +8,9 @@
     "agents:payment-agent": "npx tsx agents/payment-agent/src/index.ts",
     "agents:carbon-credit-negotiation": "npx tsx agents/carbon-credit-negotiation-agent/src/index.ts",
     "agents:wallet-balance": "npx tsx agents/wallet-balance-agent/src/index.ts",
-    "agents:all": "concurrently \"npm run agents:payment-agent\" \"npm run agents:carbon-credit-negotiation\" \"npm run agents:wallet-balance\"",
+    "agents:orchestrator": "cd agents/orchestrator-agent && npx tsx src/index.ts",
+    "agents:all": "concurrently \"npm run agents:payment-agent\" \"npm run agents:carbon-credit-negotiation\" \"npm run agents:wallet-balance\" \"npm run agents:orchestrator\"",
+    "start:all": "concurrently \"npm run agents:all\" \"npm run ui:dev\"",
     "ui:dev": "cd web-ui && npm run dev",
     "ui:build": "cd web-ui && npm run build",
     "ui:start": "cd web-ui && npm run start",
@@ -16,7 +18,7 @@
     "demo:carbon-credit": "npx tsx demo/carbon-credit-demo.ts",
     "demo:carbon-credit-payment": "npx tsx demo/carbon-credit-payment-demo.ts",
     "demo:wallet-balance": "npx tsx demo/wallet-balance-demo.ts",
-    "setup": "npm install && cd web-ui && npm install && cd ../agents/payment-agent && npm install && cd ../carbon-credit-negotiation-agent && npm install && cd ../wallet-balance-agent && npm install"
+    "setup": "npm install && cd web-ui && npm install && cd ../agents/payment-agent && npm install && cd ../carbon-credit-negotiation-agent && npm install && cd ../wallet-balance-agent && npm install && cd ../orchestrator-agent && npm install"
   },
   "keywords": [
     "a2a",
