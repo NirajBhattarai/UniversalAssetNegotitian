@@ -7,23 +7,29 @@ import { z } from 'zod';
  */
 export const createCarbonCreditNegotiationTool = () => {
   return tool(
-    async ({ request, projectType, location, budget, timeframe }: { 
-      request: string; 
-      projectType?: string; 
-      location?: string; 
-      budget?: string; 
-      timeframe?: string; 
+    async ({
+      request,
+      projectType,
+      location,
+      budget,
+      timeframe,
+    }: {
+      request: string;
+      projectType?: string;
+      location?: string;
+      budget?: string;
+      timeframe?: string;
     }): Promise<string> => {
       /**
        * Find and negotiate carbon credit deals
-       * 
+       *
        * This tool connects to the carbon credit negotiation agent service to:
        * - Find available carbon credit projects
        * - Negotiate deals and pricing
        * - Provide project details and verification
        * - Calculate carbon offset potential
-       * 
-       * Supported project types: Renewable Energy, Reforestation, Energy Efficiency, 
+       *
+       * Supported project types: Renewable Energy, Reforestation, Energy Efficiency,
        * Carbon Capture, Methane Reduction, Sustainable Agriculture
        */
 
@@ -53,10 +59,10 @@ export const createCarbonCreditNegotiationTool = () => {
         if (response.ok) {
           // Format the response nicely
           let result = `🌱 **Carbon Credit Negotiation Results**\n\n`;
-          
+
           if (data.projects && data.projects.length > 0) {
             result += `**Found ${data.projects.length} Available Projects:**\n\n`;
-            
+
             data.projects.forEach((project: any, index: number) => {
               result += `**Project ${index + 1}: ${project.name || 'Unnamed Project'}**\n`;
               result += `- **Type:** ${project.type || 'Not specified'}\n`;
@@ -66,18 +72,18 @@ export const createCarbonCreditNegotiationTool = () => {
               result += `- **Total Cost:** $${project.totalCost || 'N/A'}\n`;
               result += `- **Verification:** ${project.verification || 'Not specified'}\n`;
               result += `- **Status:** ${project.status || 'Available'}\n`;
-              
+
               if (project.description) {
                 result += `- **Description:** ${project.description}\n`;
               }
-              
+
               if (project.contact) {
                 result += `- **Contact:** ${project.contact}\n`;
               }
-              
+
               result += `\n`;
             });
-            
+
             // Add summary information
             if (data.summary) {
               result += `**Summary:**\n`;
@@ -86,13 +92,12 @@ export const createCarbonCreditNegotiationTool = () => {
               result += `- Total Credits Available: ${data.summary.totalCredits || 'N/A'} tons CO2e\n`;
               result += `- Estimated Total Value: $${data.summary.totalValue || 'N/A'}\n\n`;
             }
-            
+
             result += `**Next Steps:**\n`;
             result += `- Review the available projects above\n`;
             result += `- Contact project developers for detailed negotiations\n`;
             result += `- Verify project credentials and carbon credit standards\n`;
             result += `- Consider your budget and timeline requirements\n`;
-            
           } else {
             result += `**No Projects Found**\n\n`;
             result += `No carbon credit projects were found matching your criteria.\n\n`;
@@ -102,10 +107,10 @@ export const createCarbonCreditNegotiationTool = () => {
             result += `- Adjust your budget or timeframe requirements\n`;
             result += `- Contact the carbon credit agent for personalized recommendations\n`;
           }
-          
+
           result += `\n**Last Updated:** ${new Date().toLocaleString()}\n`;
           result += `**Data Source:** Carbon Credit Negotiation Agent`;
-          
+
           return result;
         } else {
           return `⚠️ **Carbon Credit Service Error**\n\nFailed to retrieve carbon credit projects.\n\n**Error:** ${data.error || 'Unknown error'}\n\n**Troubleshooting:**\n- Ensure the carbon credit negotiation agent service is running on localhost:41251\n- Verify your request parameters are valid\n- Check if the service endpoint is accessible\n- Try simplifying your request or adjusting search criteria`;
@@ -153,7 +158,9 @@ Examples:
         projectType: z
           .string()
           .optional()
-          .describe('Type of project: renewable-energy, reforestation, energy-efficiency, carbon-capture, methane-reduction, sustainable-agriculture, or any')
+          .describe(
+            'Type of project: renewable-energy, reforestation, energy-efficiency, carbon-capture, methane-reduction, sustainable-agriculture, or any'
+          )
           .default('any'),
         location: z
           .string()

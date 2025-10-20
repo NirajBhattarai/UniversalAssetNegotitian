@@ -36,7 +36,7 @@ export const STREAMING_DELAY_MS = 30;
 export const SSE_HEADERS = {
   'Content-Type': 'text/event-stream',
   'Cache-Control': 'no-cache, no-store, must-revalidate',
-  'Connection': 'keep-alive',
+  Connection: 'keep-alive',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Cache-Control',
   'Transfer-Encoding': 'chunked',
@@ -126,13 +126,13 @@ export function createChatPrompt() {
 
 export function createAgentExecutor(llm: any, tools: any[]) {
   const prompt = createChatPrompt();
-  
+
   const agent = createToolCallingAgent({
     llm,
     tools,
     prompt,
   });
-  
+
   return new AgentExecutor({
     agent,
     tools,
@@ -148,11 +148,18 @@ export function setupTools() {
   const carbonCreditNegotiationTool = createCarbonCreditNegotiationTool();
   const paymentAgentTool = createPaymentAgentTool();
   const communicationAgentTool = createCommunicationAgentTool();
-  
+
   return {
     client,
     toolkit,
-    tools: [...hederaTools, agentRoutingTool, walletBalanceTool, carbonCreditNegotiationTool, paymentAgentTool, communicationAgentTool],
+    tools: [
+      ...hederaTools,
+      agentRoutingTool,
+      walletBalanceTool,
+      carbonCreditNegotiationTool,
+      paymentAgentTool,
+      communicationAgentTool,
+    ],
   };
 }
 

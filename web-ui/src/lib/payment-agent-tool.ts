@@ -7,35 +7,35 @@ import { z } from 'zod';
  */
 export const createPaymentAgentTool = () => {
   return tool(
-    async ({ 
-      request, 
-      amount, 
-      currency, 
-      recipient, 
-      paymentMethod, 
+    async ({
+      request,
+      amount,
+      currency,
+      recipient,
+      paymentMethod,
       transactionType,
       projectId,
-      description 
-    }: { 
-      request: string; 
-      amount?: string; 
-      currency?: string; 
-      recipient?: string; 
-      paymentMethod?: string; 
+      description,
+    }: {
+      request: string;
+      amount?: string;
+      currency?: string;
+      recipient?: string;
+      paymentMethod?: string;
       transactionType?: string;
       projectId?: string;
       description?: string;
     }): Promise<string> => {
       /**
        * Process payments for carbon credits and other transactions
-       * 
+       *
        * This tool connects to the payment agent service to:
        * - Process carbon credit purchases
        * - Handle secure payment transactions
        * - Support multiple payment methods (crypto, fiat, credit cards)
        * - Generate payment confirmations and receipts
        * - Track transaction status
-       * 
+       *
        * Supported payment methods: Bitcoin, Ethereum, Credit Card, Bank Transfer, PayPal
        * Supported currencies: USD, EUR, BTC, ETH, HBAR
        */
@@ -57,20 +57,23 @@ export const createPaymentAgentTool = () => {
         };
 
         // Call the payment agent service
-        const response = await fetch('http://localhost:41253/api/process-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
+        const response = await fetch(
+          'http://localhost:41253/api/process-payment',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          }
+        );
 
         const data = await response.json();
 
         if (response.ok) {
           // Format the response nicely
           let result = `💳 **Payment Processing Results**\n\n`;
-          
+
           if (data.transaction) {
             const transaction = data.transaction;
             result += `**Transaction Details:**\n`;
@@ -80,26 +83,28 @@ export const createPaymentAgentTool = () => {
             result += `- **Recipient:** ${transaction.recipient || 'N/A'}\n`;
             result += `- **Status:** ${transaction.status || 'Processing'}\n`;
             result += `- **Type:** ${transaction.type || 'N/A'}\n`;
-            
+
             if (transaction.projectId) {
               result += `- **Project ID:** ${transaction.projectId}\n`;
             }
-            
+
             if (transaction.description) {
               result += `- **Description:** ${transaction.description}\n`;
             }
-            
+
             result += `- **Timestamp:** ${transaction.timestamp || new Date().toLocaleString()}\n\n`;
-            
+
             // Add payment method specific information
             if (transaction.paymentDetails) {
               result += `**Payment Details:**\n`;
-              Object.entries(transaction.paymentDetails).forEach(([key, value]) => {
-                result += `- **${key}:** ${value}\n`;
-              });
+              Object.entries(transaction.paymentDetails).forEach(
+                ([key, value]) => {
+                  result += `- **${key}:** ${value}\n`;
+                }
+              );
               result += `\n`;
             }
-            
+
             // Add blockchain transaction info if available
             if (transaction.blockchainTx) {
               result += `**Blockchain Transaction:**\n`;
@@ -108,7 +113,7 @@ export const createPaymentAgentTool = () => {
               result += `- **Confirmations:** ${transaction.blockchainTx.confirmations || '0'}\n`;
               result += `- **Gas Used:** ${transaction.blockchainTx.gasUsed || 'N/A'}\n\n`;
             }
-            
+
             // Add next steps based on status
             if (transaction.status === 'completed') {
               result += `✅ **Payment Completed Successfully!**\n\n`;
@@ -130,7 +135,6 @@ export const createPaymentAgentTool = () => {
               result += `- Try a different payment method if available\n`;
               result += `- Contact support for assistance\n`;
             }
-            
           } else {
             result += `**Payment Request Received**\n\n`;
             result += `Your payment request has been submitted to the payment agent.\n\n`;
@@ -144,10 +148,10 @@ export const createPaymentAgentTool = () => {
             result += `- Complete the payment process\n`;
             result += `- Monitor for confirmation\n`;
           }
-          
+
           result += `\n**Last Updated:** ${new Date().toLocaleString()}\n`;
           result += `**Data Source:** Payment Agent Service`;
-          
+
           return result;
         } else {
           return `⚠️ **Payment Service Error**\n\nFailed to process payment request.\n\n**Error:** ${data.error || 'Unknown error'}\n\n**Troubleshooting:**\n- Ensure the payment agent service is running on localhost:41253\n- Verify your payment details are correct\n- Check if the service endpoint is accessible\n- Try a different payment method if available`;
@@ -194,11 +198,7 @@ Examples:
         request: z
           .string()
           .describe('The payment request or transaction details'),
-        amount: z
-          .string()
-          .optional()
-          .describe('Payment amount')
-          .default('0'),
+        amount: z.string().optional().describe('Payment amount').default('0'),
         currency: z
           .string()
           .optional()
@@ -212,12 +212,16 @@ Examples:
         paymentMethod: z
           .string()
           .optional()
-          .describe('Payment method: bitcoin, ethereum, credit_card, bank_transfer, paypal')
+          .describe(
+            'Payment method: bitcoin, ethereum, credit_card, bank_transfer, paypal'
+          )
           .default('crypto'),
         transactionType: z
           .string()
           .optional()
-          .describe('Type of transaction: carbon_credit_purchase, project_payment, general_payment')
+          .describe(
+            'Type of transaction: carbon_credit_purchase, project_payment, general_payment'
+          )
           .default('carbon_credit_purchase'),
         projectId: z
           .string()

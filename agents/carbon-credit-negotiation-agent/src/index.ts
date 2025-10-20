@@ -633,7 +633,44 @@ async function main() {
     });
   });
 
-  // 7. Start server
+  // 7. Add direct API endpoint for carbon credit negotiation
+  app.post('/api/negotiate', async (req, res) => {
+    try {
+      const { credits, maxPrice, paymentMethod } = req.body;
+      
+      if (!credits) {
+        return res.status(400).json({ error: 'Number of credits is required' });
+      }
+
+      // Mock carbon credit negotiation logic
+      const basePrice = 15; // $15 per credit base price
+      const negotiatedPrice = Math.max(basePrice * 0.8, maxPrice || basePrice); // 20% discount or max price
+      const totalCost = credits * negotiatedPrice;
+      
+      const negotiationResult = {
+        credits: credits,
+        pricePerCredit: negotiatedPrice,
+        totalCost: totalCost,
+        paymentMethod: paymentMethod || 'USDC',
+        company: {
+          id: 1,
+          name: 'EcoTech Solutions',
+          location: 'California, USA',
+          sustainabilityRating: 4.8
+        },
+        savings: credits * (basePrice - negotiatedPrice),
+        timestamp: new Date().toISOString(),
+        status: 'negotiated'
+      };
+
+      res.json(negotiationResult);
+    } catch (error: any) {
+      console.error('Carbon credit negotiation error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // 8. Start server
   const port = 41251;
   app.listen(port, () => {
     console.log(`🚀 Carbon Credit Negotiation Agent running on port ${port}`);

@@ -7,13 +7,19 @@ import { z } from 'zod';
  */
 export const createWalletBalanceTool = () => {
   return tool(
-    async ({ walletAddress, network = 'all' }: { walletAddress: string; network?: string }): Promise<string> => {
+    async ({
+      walletAddress,
+      network = 'all',
+    }: {
+      walletAddress: string;
+      network?: string;
+    }): Promise<string> => {
       /**
        * Check wallet balance across multiple blockchain networks
-       * 
+       *
        * This tool connects to the wallet balance agent service running on localhost:41252
        * to retrieve comprehensive balance information across multiple networks.
-       * 
+       *
        * Supported networks: Ethereum, Polygon, BSC, Arbitrum, Optimism, Avalanche, Hedera
        */
 
@@ -26,12 +32,17 @@ export const createWalletBalanceTool = () => {
         // Check if it's a valid address format
         const ethAddressPattern = /^0x[a-fA-F0-9]{40}$/;
         const hederaAddressPattern = /^0\.0\.\d+$/;
-        
-        if (!ethAddressPattern.test(walletAddress) && !hederaAddressPattern.test(walletAddress)) {
+
+        if (
+          !ethAddressPattern.test(walletAddress) &&
+          !hederaAddressPattern.test(walletAddress)
+        ) {
           return '❌ **Error:** Invalid wallet address format. Please provide a valid Ethereum address (0x...) or Hedera account ID (0.0.xxx).';
         }
 
-        console.log(`Checking wallet balance for: ${walletAddress} on network: ${network}`);
+        console.log(
+          `Checking wallet balance for: ${walletAddress} on network: ${network}`
+        );
 
         // Prepare the request body with proper network handling
         const requestBody: any = {
@@ -61,62 +72,66 @@ export const createWalletBalanceTool = () => {
 
           clearTimeout(timeoutId);
 
-        const data = await response.json();
+          const data = await response.json();
 
-        if (response.ok) {
-          // Format the response nicely
-          const networks = data.networks || {};
-          const totalValue = data.totalUsdValue || 0;
-          
-          let result = `💰 **Multi-Network Wallet Balance Report**\n\n`;
-          result += `**Wallet Address:** \`${walletAddress}\`\n`;
-          result += `**Total Portfolio Value:** $${totalValue.toFixed(2)}\n`;
-          result += `**Networks Checked:** ${Object.keys(networks).length}\n\n`;
-          
-          result += `**Network Breakdown:**\n`;
-          
-          // Sort networks by USD value (descending)
-          const sortedNetworks = Object.entries(networks)
-            .sort(([,a], [,b]) => ((b as any).usdValue || 0) - ((a as any).usdValue || 0));
-          
-          for (const [networkName, networkData] of sortedNetworks) {
-            const data = networkData as any;
-            const usdValue = data.usdValue || 0;
-            const nativeBalance = data.nativeBalance || '0';
-            const nativeSymbol = data.nativeSymbol || 'Unknown';
-            
-            result += `\n**${networkName.toUpperCase()}**\n`;
-            result += `- Native Balance: ${nativeBalance} ${nativeSymbol}\n`;
-            result += `- USD Value: $${usdValue.toFixed(2)}\n`;
-            
-            // Add token balances if available
-            if (data.tokens && data.tokens.length > 0) {
-              result += `- Tokens: ${data.tokens.length} tokens\n`;
-              // Show top 3 tokens by value
-              const topTokens = data.tokens
-                .sort((a: any, b: any) => (b.usdValue || 0) - (a.usdValue || 0))
-                .slice(0, 3);
-              
-              for (const token of topTokens) {
-                result += `  • ${token.symbol}: ${token.balance} ($${token.usdValue?.toFixed(2) || '0.00'})\n`;
+          if (response.ok) {
+            // Format the response nicely
+            const networks = data.networks || {};
+            const totalValue = data.totalUsdValue || 0;
+
+            let result = `💰 **Multi-Network Wallet Balance Report**\n\n`;
+            result += `**Wallet Address:** \`${walletAddress}\`\n`;
+            result += `**Total Portfolio Value:** $${totalValue.toFixed(2)}\n`;
+            result += `**Networks Checked:** ${Object.keys(networks).length}\n\n`;
+
+            result += `**Network Breakdown:**\n`;
+
+            // Sort networks by USD value (descending)
+            const sortedNetworks = Object.entries(networks).sort(
+              ([, a], [, b]) =>
+                ((b as any).usdValue || 0) - ((a as any).usdValue || 0)
+            );
+
+            for (const [networkName, networkData] of sortedNetworks) {
+              const data = networkData as any;
+              const usdValue = data.usdValue || 0;
+              const nativeBalance = data.nativeBalance || '0';
+              const nativeSymbol = data.nativeSymbol || 'Unknown';
+
+              result += `\n**${networkName.toUpperCase()}**\n`;
+              result += `- Native Balance: ${nativeBalance} ${nativeSymbol}\n`;
+              result += `- USD Value: $${usdValue.toFixed(2)}\n`;
+
+              // Add token balances if available
+              if (data.tokens && data.tokens.length > 0) {
+                result += `- Tokens: ${data.tokens.length} tokens\n`;
+                // Show top 3 tokens by value
+                const topTokens = data.tokens
+                  .sort(
+                    (a: any, b: any) => (b.usdValue || 0) - (a.usdValue || 0)
+                  )
+                  .slice(0, 3);
+
+                for (const token of topTokens) {
+                  result += `  • ${token.symbol}: ${token.balance} ($${token.usdValue?.toFixed(2) || '0.00'})\n`;
+                }
               }
             }
+
+            result += `\n**Last Updated:** ${new Date().toLocaleString()}\n`;
+            result += `**Data Source:** Multi-Network Wallet Balance Agent`;
+
+            return result;
+          } else {
+            return `⚠️ **Wallet Balance Service Error**\n\nFailed to retrieve balance information.\n\n**Error:** ${data.error || 'Unknown error'}\n\n**Troubleshooting:**\n- Ensure the wallet balance agent service is running on localhost:41252\n- Verify the wallet address format is correct\n- Check if the wallet has any activity on the requested networks`;
           }
-          
-          result += `\n**Last Updated:** ${new Date().toLocaleString()}\n`;
-          result += `**Data Source:** Multi-Network Wallet Balance Agent`;
-          
-          return result;
-        } else {
-          return `⚠️ **Wallet Balance Service Error**\n\nFailed to retrieve balance information.\n\n**Error:** ${data.error || 'Unknown error'}\n\n**Troubleshooting:**\n- Ensure the wallet balance agent service is running on localhost:41252\n- Verify the wallet address format is correct\n- Check if the wallet has any activity on the requested networks`;
-        }
         } catch (fetchError) {
           clearTimeout(timeoutId);
-          
+
           if (fetchError instanceof Error && fetchError.name === 'AbortError') {
             return `⏰ **Request Timeout**\n\nThe wallet balance request timed out after 30 seconds.\n\n**Possible causes:**\n- The wallet balance agent service is overloaded\n- Network connectivity issues\n- The wallet address has no activity on the requested networks\n\n**Troubleshooting:**\n- Try again with a specific network (e.g., "ethereum" instead of "all")\n- Ensure the wallet balance agent service is running properly\n- Check if the wallet address is valid and has activity`;
           }
-          
+
           console.error('Wallet balance tool error:', fetchError);
           return `❌ **Connection Error**\n\nFailed to connect to the wallet balance agent service.\n\n**Error:** ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}\n\n**Troubleshooting:**\n- Ensure the wallet balance agent service is running on localhost:41252\n- Check your network connection\n- Verify the service endpoint is accessible`;
         }
@@ -150,11 +165,15 @@ Examples:
       schema: z.object({
         walletAddress: z
           .string()
-          .describe('The wallet address to check balance for (Ethereum: 0x... or Hedera: 0.0.xxx)'),
+          .describe(
+            'The wallet address to check balance for (Ethereum: 0x... or Hedera: 0.0.xxx)'
+          ),
         network: z
           .string()
           .optional()
-          .describe('Specific network to check. Use "all" for all networks, or specify: "ethereum", "polygon", "bsc", "arbitrum", "optimism", "avalanche", "hedera"')
+          .describe(
+            'Specific network to check. Use "all" for all networks, or specify: "ethereum", "polygon", "bsc", "arbitrum", "optimism", "avalanche", "hedera"'
+          )
           .default('all'),
       }),
     }

@@ -531,6 +531,41 @@ async function main() {
   const appBuilder = new A2AExpressApp(requestHandler);
   appBuilder.setupRoutes(expressApp, '');
 
+  // Add direct API endpoint for payment processing
+  expressApp.post('/api/process-payment', async (req, res) => {
+    try {
+      const { credits, totalCost, companyId, paymentMethod } = req.body;
+      
+      if (!credits || !totalCost || !companyId) {
+        return res.status(400).json({ error: 'credits, totalCost, and companyId are required' });
+      }
+
+      // Mock payment processing
+      const paymentResult = {
+        success: true,
+        transactionId: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        paymentId: `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        creditsPurchased: credits,
+        totalCost: totalCost,
+        paymentMethod: paymentMethod || 'USDC',
+        companyId: companyId,
+        companyName: `Company ${companyId}`,
+        blockchainDetails: {
+          network: 'Hedera',
+          transactionHash: `0x${Math.random().toString(16).substr(2, 64)}`,
+          gasUsed: Math.floor(Math.random() * 1000) + 500,
+          status: 'confirmed'
+        },
+        timestamp: new Date().toISOString()
+      };
+
+      res.json(paymentResult);
+    } catch (error: any) {
+      console.error('Payment processing error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const PORT = process.env.PAYMENT_AGENT_PORT || 41245;
   expressApp.listen(PORT, () => {
     console.log(`[Carbon Credit Payment Agent] Server started on http://localhost:${PORT}`);

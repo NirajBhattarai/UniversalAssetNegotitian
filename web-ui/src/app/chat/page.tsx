@@ -35,7 +35,9 @@ function ChatInterface() {
   const [isHederaAgentLoading, setIsHederaAgentLoading] = useState(false);
   const [isHederaAgentSigning, setIsHederaAgentSigning] = useState(false);
   const [input, setInput] = useState('');
-  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
+    null
+  );
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -132,7 +134,12 @@ function ChatInterface() {
                 setHederaAgentMessages(prev => {
                   const updated = prev.map(msg => {
                     if (msg.id === currentStreamingId) {
-                      console.log('Found streaming message, updating content from:', msg.content, 'to:', msg.content + data.content);
+                      console.log(
+                        'Found streaming message, updating content from:',
+                        msg.content,
+                        'to:',
+                        msg.content + data.content
+                      );
                       return { ...msg, content: msg.content + data.content };
                     }
                     return msg;
@@ -234,67 +241,49 @@ function ChatInterface() {
           <div className='text-xs font-semibold text-gray-500 uppercase px-3 py-2'>
             Available Agents
           </div>
-          
+
           {/* Wallet Balance Agent */}
-          <button
-            className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
-          >
+          <button className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'>
             <span className='text-lg'>💰</span>
             <div className='flex-1 text-left'>
               <div className='font-medium'>Wallet Balance Agent</div>
-              <div className='text-xs text-white/80'>
-                Port: 41252
-              </div>
+              <div className='text-xs text-white/80'>Port: 41252</div>
             </div>
             <CheckCircle className='w-4 h-4 text-green-500' />
           </button>
 
           {/* Carbon Credit Negotiation Agent */}
-          <button
-            className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md'
-          >
+          <button className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md'>
             <span className='text-lg'>🌱</span>
             <div className='flex-1 text-left'>
               <div className='font-medium'>Carbon Credit Negotiation</div>
-              <div className='text-xs text-white/80'>
-                Port: 41251
-              </div>
+              <div className='text-xs text-white/80'>Port: 41251</div>
             </div>
             <CheckCircle className='w-4 h-4 text-green-500' />
           </button>
 
           {/* Payment Agent */}
-          <button
-            className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md'
-          >
+          <button className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md'>
             <span className='text-lg'>💳</span>
             <div className='flex-1 text-left'>
               <div className='font-medium'>Payment Agent</div>
-              <div className='text-xs text-white/80'>
-                Port: 41253
-              </div>
+              <div className='text-xs text-white/80'>Port: 41253</div>
             </div>
             <CheckCircle className='w-4 h-4 text-green-500' />
           </button>
 
           {/* Communication Agent */}
-          <button
-            className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
-          >
+          <button className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'>
             <span className='text-lg'>🤖</span>
             <div className='flex-1 text-left'>
               <div className='font-medium'>Communication Agent</div>
-              <div className='text-xs text-white/80'>
-                Port: 41254
-              </div>
+              <div className='text-xs text-white/80'>Port: 41254</div>
             </div>
             <CheckCircle className='w-4 h-4 text-green-500' />
           </button>
 
           {/* Hedera AI Agent */}
-          <button
-            className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-md'
-          >
+          <button className='w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-md'>
             <span className='text-lg'>🔗</span>
             <div className='flex-1 text-left'>
               <div className='font-medium'>Hedera AI Agent</div>
@@ -324,10 +313,13 @@ function ChatInterface() {
               <div className='w-20 h-20 bg-gradient-to-r from-indigo-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6'>
                 <Bot className='w-10 h-10 text-indigo-600' />
               </div>
-              <p className='text-xl font-semibold mb-3'>Multi-Agent Carbon Credit Platform</p>
+              <p className='text-xl font-semibold mb-3'>
+                Multi-Agent Carbon Credit Platform
+              </p>
               <p className='text-sm'>
-                Interact with our comprehensive carbon credit trading platform using natural language.
-                Check wallet balances, find carbon credit projects, process payments, and coordinate workflows.
+                Interact with our comprehensive carbon credit trading platform
+                using natural language. Check wallet balances, find carbon
+                credit projects, process payments, and coordinate workflows.
               </p>
               <div className='text-xs mt-4 space-y-1'>
                 <p className='font-medium'>Try asking:</p>
@@ -353,9 +345,10 @@ function ChatInterface() {
                 >
                   <div className='whitespace-pre-wrap'>
                     {message.content}
-                    {message.id === streamingMessageId && isHederaAgentLoading && (
-                      <span className='animate-pulse text-blue-500'>▋</span>
-                    )}
+                    {message.id === streamingMessageId &&
+                      isHederaAgentLoading && (
+                        <span className='animate-pulse text-blue-500'>▋</span>
+                      )}
                   </div>
                   {message.requiresSigning && (
                     <div className='mt-3 pt-3 border-t border-gray-300'>
@@ -420,7 +413,8 @@ function ChatInterface() {
           <div className='mt-3 text-xs text-gray-500 flex items-center space-x-2'>
             <span>💡</span>
             <span>
-              Try: "Check my wallet balance" or "Find carbon credit projects in Brazil"
+              Try: "Check my wallet balance" or "Find carbon credit projects in
+              Brazil"
             </span>
           </div>
         </div>
@@ -500,9 +494,7 @@ export default function ChatPage() {
             </div>
             <div className='flex items-center space-x-2 sm:space-x-3 flex-shrink-0'>
               <div className='px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium'>
-                <span className='hidden sm:inline'>
-                  🟢 All Systems Online
-                </span>
+                <span className='hidden sm:inline'>🟢 All Systems Online</span>
                 <span className='sm:hidden'>🟢</span>
               </div>
             </div>
@@ -589,9 +581,7 @@ export default function ChatPage() {
                   <span className='text-white text-lg'>💳</span>
                 </div>
                 <div className='flex-1'>
-                  <h3 className='font-medium text-gray-900'>
-                    Payment Agent
-                  </h3>
+                  <h3 className='font-medium text-gray-900'>Payment Agent</h3>
                   <p className='text-sm text-gray-600'>Port: 41253</p>
                   <div className='flex items-center mt-1'>
                     <div className='w-2 h-2 bg-green-500 rounded-full mr-2'></div>
@@ -623,10 +613,10 @@ export default function ChatPage() {
                   <span className='text-white text-lg'>🔗</span>
                 </div>
                 <div className='flex-1'>
-                  <h3 className='font-medium text-gray-900'>
-                    Hedera AI Agent
-                  </h3>
-                  <p className='text-sm text-gray-600'>Natural language interface</p>
+                  <h3 className='font-medium text-gray-900'>Hedera AI Agent</h3>
+                  <p className='text-sm text-gray-600'>
+                    Natural language interface
+                  </p>
                   <div className='flex items-center mt-1'>
                     <div className='w-2 h-2 bg-green-500 rounded-full mr-2'></div>
                     <span className='text-xs text-green-600'>Online</span>
